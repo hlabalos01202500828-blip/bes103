@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BES 103 — Interactive Reviewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050810;
+  --bg2: #0a0f1e;
+  --bg3: #0f1628;
+  --cyan: #00e5ff;
+  --pink: #ff2d78;
+  --lime: #b6ff00;
+  --gold: #ffd700;
+  --white: #e8f4f8;
+  --gray: #4a5568;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(0,229,255,0.15);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
+  min-height: 100vh;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+/* HEADER */
+.header {
+  text-align: center;
+  padding: 40px 20px 20px;
+  background: linear-gradient(180deg, rgba(0,229,255,0.08) 0%, transparent 100%);
+  border-bottom: 1px solid var(--border);
+}
+.header h1 {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(1.4rem, 4vw, 2.4rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--cyan), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px;
+}
+.header p {
+  font-family: 'Share Tech Mono', monospace;
+  color: rgba(0,229,255,0.6);
+  font-size: 0.8rem;
+  margin-top: 6px;
+}
+/* TABS */
+.tabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 16px 20px;
+  position: sticky;
+  top: 0;
+  background: rgba(5,8,16,0.95);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  border-bottom: 1px solid var(--border);
+}
+.tab-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  padding: 8px 16px;
+  background: transparent;
+  border: 1px solid var(--gray);
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.2s;
+  clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+}
+.tab-btn:hover, .tab-btn.active {
+  border-color: var(--cyan);
+  color: var(--cyan);
+  background: rgba(0,229,255,0.08);
+  box-shadow: 0 0 12px rgba(0,229,255,0.2);
+}
+/* PANELS */
+.panel { display: none; padding: 30px 20px; max-width: 900px; margin: 0 auto; }
+.panel.active { display: block; }
+/* CARDS */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.section-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  color: var(--cyan);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+/* OVERVIEW */
+.topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.topic-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  transition: border-color 0.2s;
+}
+.topic-card:hover { border-color: var(--cyan); }
+.topic-card h3 {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--cyan);
+  margin-bottom: 8px;
+}
+.topic-card ul { list-style: none; }
+.topic-card ul li {
+  font-size: 0.85rem;
+  color: rgba(232,244,248,0.7);
+  padding: 2px 0;
+  padding-left: 12px;
+  position: relative;
+}
+.topic-card ul li::before { content: '▸'; position: absolute; left: 0; color: var(--pink); font-size: 0.7rem; }
+/* QUIZ SETUP */
+.quiz-setup { text-align: center; }
+.setup-group { margin-bottom: 24px; }
+.setup-group label {
+  display: block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--cyan);
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+.btn-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.sel-btn {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 20px;
+  background: transparent;
+  border: 1px solid var(--gray);
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 4px;
+}
+.sel-btn.selected, .sel-btn:hover {
+  border-color: var(--lime);
+  color: var(--lime);
+  background: rgba(182,255,0,0.08);
+}
+.start-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  padding: 14px 40px;
+  background: linear-gradient(135deg, var(--cyan), #0099cc);
+  border: none;
+  color: #000;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+  transition: opacity 0.2s;
+}
+.start-btn:hover { opacity: 0.85; }
+/* QUIZ */
+#quiz-screen { display: none; }
+.progress-bar { height: 3px; background: var(--gray); border-radius: 2px; margin-bottom: 20px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--pink)); border-radius: 2px; transition: width 0.4s; }
+.q-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.q-counter { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: rgba(232,244,248,0.5); }
+.diff-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+.diff-hard { background: rgba(255,215,0,0.15); color: var(--gold); border: 1px solid rgba(255,215,0,0.3); }
+.diff-harder { background: rgba(255,140,0,0.15); color: #ff8c00; border: 1px solid rgba(255,140,0,0.3); }
+.diff-hardest { background: rgba(255,45,120,0.15); color: var(--pink); border: 1px solid rgba(255,45,120,0.3); }
+.cat-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(0,229,255,0.5);
+}
+.streak { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: var(--lime); }
+.q-text {
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  color: var(--white);
+}
+.options { display: grid; gap: 10px; }
+.opt-btn {
+  text-align: left;
+  padding: 12px 16px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--white);
+  cursor: pointer;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 4px;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.opt-btn:hover:not(:disabled) { border-color: var(--cyan); background: rgba(0,229,255,0.05); }
+.opt-btn.correct { border-color: var(--lime); background: rgba(182,255,0,0.1); color: var(--lime); }
+.opt-btn.wrong { border-color: var(--pink); background: rgba(255,45,120,0.1); color: var(--pink); }
+.opt-letter {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.65rem;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.explanation {
+  margin-top: 16px;
+  padding: 14px;
+  background: rgba(0,229,255,0.05);
+  border-left: 3px solid var(--cyan);
+  border-radius: 0 4px 4px 0;
+  font-size: 0.9rem;
+  color: rgba(232,244,248,0.8);
+  display: none;
+}
+.explanation.show { display: block; }
+.next-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  padding: 12px 30px;
+  background: transparent;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  cursor: pointer;
+  margin-top: 16px;
+  display: none;
+  transition: all 0.2s;
+}
+.next-btn.show { display: inline-block; }
+.next-btn:hover { background: rgba(0,229,255,0.1); }
+/* RESULTS */
+#results-screen { display: none; text-align: center; }
+.score-ring {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: conic-gradient(var(--cyan) var(--pct), rgba(255,255,255,0.05) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px auto;
+  position: relative;
+}
+.score-ring::before {
+  content: '';
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: var(--bg2);
+}
+.score-pct {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--cyan);
+  position: relative;
+  z-index: 1;
+}
+.retry-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  padding: 12px 30px;
+  background: transparent;
+  border: 1px solid var(--pink);
+  color: var(--pink);
+  cursor: pointer;
+  margin: 8px;
+  transition: all 0.2s;
+}
+.retry-btn:hover { background: rgba(255,45,120,0.1); }
+/* FLASHCARDS */
+.fc-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 20px; }
+.fc-btn {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 8px 18px;
+  background: transparent;
+  border: 1px solid var(--gray);
+  color: var(--gray);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.fc-btn:hover, .fc-btn.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(255,215,0,0.06);
+}
+.fc-progress { font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; color: rgba(232,244,248,0.4); margin-left: auto; }
+.card-wrapper {
+  perspective: 1000px;
+  height: 220px;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+.card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-wrapper.flipped .card-inner { transform: rotateY(180deg); }
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.card-front {
+  background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(0,229,255,0.02));
+}
+.card-back {
+  background: linear-gradient(135deg, rgba(255,45,120,0.06), rgba(255,45,120,0.02));
+  transform: rotateY(180deg);
+  border-color: rgba(255,45,120,0.2);
+}
+.card-term {
+  font-family: 'Orbitron', monospace;
+  font-size: clamp(0.9rem, 3vw, 1.3rem);
+  font-weight: 700;
+  color: var(--cyan);
+  text-align: center;
+  margin-bottom: 10px;
+}
+.card-hint { font-size: 0.75rem; color: rgba(232,244,248,0.3); font-family: 'Share Tech Mono', monospace; }
+.card-def { font-size: 0.9rem; color: var(--white); text-align: center; line-height: 1.5; }
+.card-lesson { font-size: 0.7rem; color: rgba(255,45,120,0.6); font-family: 'Share Tech Mono', monospace; margin-top: 8px; }
+.fc-nav { display: flex; gap: 10px; justify-content: center; }
+.fc-nav-btn {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 1px;
+  padding: 10px 24px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--white);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.fc-nav-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+/* STUDY GUIDE */
+.accordion-item { margin-bottom: 8px; }
+.accordion-header {
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--white);
+  cursor: pointer;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.2s;
+}
+.accordion-header:hover { background: rgba(0,229,255,0.06); }
+.accordion-header span { color: var(--cyan); font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; }
+.accordion-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+  border: 1px solid transparent;
+  border-top: none;
+}
+.accordion-body.open {
+  max-height: 2000px;
+  border-color: var(--border);
+  border-top: none;
+}
+.accordion-content {
+  padding: 18px;
+  font-size: 0.9rem;
+  color: rgba(232,244,248,0.8);
+  line-height: 1.7;
+}
+.accordion-content strong { color: var(--cyan); }
+.accordion-content em { color: var(--gold); font-style: normal; font-weight: 600; }
+.accordion-content .kw {
+  display: inline-block;
+  background: rgba(182,255,0,0.08);
+  border: 1px solid rgba(182,255,0,0.2);
+  color: var(--lime);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  padding: 1px 6px;
+  border-radius: 2px;
+  margin: 1px;
+}
+/* CRITICAL THINKING */
+.ct-card { margin-bottom: 20px; }
+.ct-q {
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  color: var(--white);
+}
+.ct-q span { color: var(--gold); font-family: 'Orbitron', monospace; font-size: 0.7rem; margin-right: 8px; }
+textarea {
+  width: 100%;
+  min-height: 100px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--white);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 0.9rem;
+  padding: 12px;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+textarea:focus { outline: none; border-color: var(--cyan); }
+.hint-btn {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid rgba(255,215,0,0.3);
+  color: rgba(255,215,0,0.6);
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s;
+}
+.hint-btn:hover { border-color: var(--gold); color: var(--gold); }
+.hint-text {
+  display: none;
+  margin-top: 10px;
+  padding: 12px;
+  background: rgba(255,215,0,0.04);
+  border-left: 3px solid var(--gold);
+  font-size: 0.85rem;
+  color: rgba(232,244,248,0.7);
+  line-height: 1.6;
+}
+.hint-text.visible { display: block; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>⚡ BES 103 — INTERACTIVE REVIEWER</h1>
+  <p>UNIVERSITY OF SOUTHEASTERN PHILIPPINES · ELECTRONICS ENGINEERING · COMPUTER ORGANIZATION & INTERNET BASICS</p>
+</div>
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('overview',this)">📊 OVERVIEW</button>
+  <button class="tab-btn" onclick="showTab('quiz',this)">🎯 QUIZ</button>
+  <button class="tab-btn" onclick="showTab('flashcards',this)">🃏 FLASHCARDS</button>
+  <button class="tab-btn" onclick="showTab('study',this)">📖 STUDY GUIDE</button>
+  <button class="tab-btn" onclick="showTab('critical',this)">🧠 CRITICAL</button>
+</div>
+
+<!-- OVERVIEW PANEL -->
+<div id="panel-overview" class="panel active">
+  <div class="section-title">LESSON 1 — COMPUTER ORGANIZATION</div>
+  <div class="topic-grid">
+    <div class="topic-card">
+      <h3>🔩 4 Elements of Computer System</h3>
+      <ul>
+        <li>Hardware — Physical components</li>
+        <li>Software — Programs & OS</li>
+        <li>Data — Raw input/output</li>
+        <li>Communications — Network links</li>
+      </ul>
+    </div>
+    <div class="topic-card">
+      <h3>🧠 CPU Architecture</h3>
+      <ul>
+        <li>Control Unit (CU) — Fetch/Decode/Execute</li>
+        <li>ALU — Arithmetic & Logic operations</li>
+        <li>Registers — Fastest on-chip storage</li>
+        <li>Bus Interface Unit — Data movement</li>
+      </ul>
+    </div>
+    <div class="topic-card">
+      <h3>💾 Storage Hierarchy</h3>
+      <ul>
+        <li>Registers → Cache (L1/L2/L3)</li>
+        <li>RAM (Primary) → Virtual Memory</li>
+        <li>Secondary (HDD/SSD/Optical)</li>
+        <li>Faster = Smaller & More Expensive</li>
+      </ul>
+    </div>
+    <div class="topic-card">
+      <h3>💻 Computer Categories</h3>
+      <ul>
+        <li>Desktop, Workstation, Mobile/Tablet</li>
+        <li>Smartphone, Game Console</li>
+        <li>Network Server, Mainframe</li>
+        <li>Supercomputer (El Capitan #1)</li>
+      </ul>
+    </div>
+    <div class="topic-card">
+      <h3>⚡ El Capitan Supercomputer</h3>
+      <ul>
+        <li>2.746 exaFLOPS peak performance</li>
+        <li>Lawrence Livermore NL, California</li>
+        <li>11M+ AMD MI300A processors</li>
+        <li>Cost: ~$600M | Power: 29.5 MW</li>
+      </ul>
+    </div>
+    <div class="topic-card">
+      <h3>🔄 System Flow</h3>
+      <ul>
+        <li>CPU ↔ Bus Interface Unit</li>
+        <li>I/O Bridge connects subsystems</li>
+        <li>Memory Bus → RAM</li>
+        <li>I/O Bus → Peripherals</li>
+      </ul>
+    </div>
+  </div>
+  <div class="section-title" style="margin-top:30px">LESSON 4 — INTERNET BASICS</div>
+  <div class="topic-grid">
+    <div class="topic-card">
+      <h3>🌐 Internet History</h3>
+      <ul>
+        <li>1958: DARPA founded (post-Sputnik)</li>
+        <li>1969: ARPAnet — 4 nodes</li>
+        <li>1991: WWW released by Tim Berners-Lee</li>
+        <li>2019: 4.39B internet users worldwide</li>
+      </ul>
+    </div>
+    <div class="topic-card">
+      <h3>🔌 LAN Components</h3>
+      <ul>
+        <li>MAC Address — Physical hardware ID</li>
+        <li>IP Address — Logical network ID</li>
+        <li>DHCP — Auto IP assignment</li>
+        <li>Switch, Modem, Gateway, Router</li>
+      </ul>
+    </div>
+    <div class="topic-card">
+      <h3>🕸️ WWW Structure</h3>
+      <ul>
+        <li>Structural: Client/Server/Cache/Internet</li>
+        <li>Semantic: HTTP/HTML/XML/URI</li>
+        <li>Client — Browser (requests pages)</li>
+        <li>Server — Responds with content</li>
+      </ul>
+    </div>
+    <div class="topic-card">
+      <h3>🔗 URL Anatomy</h3>
+      <ul>
+        <li>Protocol (http/https)</li>
+        <li>Domain Name (e.g., google.com)</li>
+        <li>Path (/folder/page.html)</li>
+        <li>Query String (?key=value)</li>
+      </ul>
+    </div>
+    <div class="topic-card">
+      <h3>☁️ Cloud vs On-Premise</h3>
+      <ul>
+        <li>Cloud: SaaS, PaaS, IaaS</li>
+        <li>Pay-per-use vs Capital Expense</li>
+        <li>Scalable vs Fixed Capacity</li>
+        <li>Provider-managed vs Self-managed</li>
+      </ul>
+    </div>
+    <div class="topic-card">
+      <h3>🛡️ Security & Protocols</h3>
+      <ul>
+        <li>Firewall — Network traffic filter</li>
+        <li>Cookies — Session state tracking</li>
+        <li>FTP — File Transfer Protocol</li>
+        <li>DNS — Domain → IP resolution</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ PANEL -->
+<div id="panel-quiz" class="panel">
+  <div id="setup-screen" class="quiz-setup">
+    <div class="section-title">QUIZ CONFIGURATION</div>
+    <div class="setup-group">
+      <label>LESSON FILTER</label>
+      <div class="btn-group">
+        <button class="sel-btn selected" data-group="filter" data-val="all" onclick="setSel(this,'filter')">ALL LESSONS</button>
+        <button class="sel-btn" data-group="filter" data-val="1" onclick="setSel(this,'filter')">LESSON 1 ONLY</button>
+        <button class="sel-btn" data-group="filter" data-val="4" onclick="setSel(this,'filter')">LESSON 4 ONLY</button>
+        <button class="sel-btn" data-group="filter" data-val="hardest" onclick="setSel(this,'filter')">HARDEST ONLY</button>
+      </div>
+    </div>
+    <div class="setup-group">
+      <label>NUMBER OF QUESTIONS</label>
+      <div class="btn-group">
+        <button class="sel-btn" data-group="count" data-val="10" onclick="setSel(this,'count')">10</button>
+        <button class="sel-btn selected" data-group="count" data-val="25" onclick="setSel(this,'count')">25</button>
+        <button class="sel-btn" data-group="count" data-val="50" onclick="setSel(this,'count')">50</button>
+        <button class="sel-btn" data-group="count" data-val="75" onclick="setSel(this,'count')">75</button>
+        <button class="sel-btn" data-group="count" data-val="150" onclick="setSel(this,'count')">ALL 150</button>
+      </div>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">▶ START QUIZ</button>
+  </div>
+  <div id="quiz-screen">
+    <div class="progress-bar"><div class="progress-fill" id="qprogress"></div></div>
+    <div class="q-meta">
+      <span class="q-counter" id="qcounter"></span>
+      <span class="diff-badge" id="qdiff"></span>
+      <span class="cat-tag" id="qcat"></span>
+      <span class="streak" id="qstreak"></span>
+    </div>
+    <div class="q-text" id="qtext"></div>
+    <div class="options" id="qoptions"></div>
+    <div class="explanation" id="qexplan"></div>
+    <button class="next-btn" id="qnext" onclick="nextQuestion()">NEXT →</button>
+  </div>
+  <div id="results-screen">
+    <div class="section-title">RESULTS</div>
+    <div class="score-ring" id="scoreRing">
+      <span class="score-pct" id="scorePct"></span>
+    </div>
+    <div id="scoreDetails" style="font-family:'Share Tech Mono',monospace;font-size:0.85rem;color:rgba(232,244,248,0.6);margin-bottom:20px;"></div>
+    <div id="scoreMsg" style="font-size:1.1rem;font-weight:700;margin-bottom:20px;"></div>
+    <button class="retry-btn" onclick="retryQuiz()">↺ RETRY SAME</button>
+    <button class="retry-btn" style="border-color:var(--cyan);color:var(--cyan)" onclick="resetQuiz()">⚙ NEW QUIZ</button>
+  </div>
+</div>
+
+<!-- FLASHCARDS PANEL -->
+<div id="panel-flashcards" class="panel">
+  <div class="fc-controls">
+    <button class="fc-btn active" id="fc-all" onclick="filterCards('all',this)">ALL (50)</button>
+    <button class="fc-btn" id="fc-l1" onclick="filterCards('1',this)">LESSON 1 (25)</button>
+    <button class="fc-btn" id="fc-l4" onclick="filterCards('4',this)">LESSON 4 (25)</button>
+    <button class="fc-btn" onclick="shuffleCards()">🔀 SHUFFLE</button>
+    <span class="fc-progress" id="fc-prog">1 / 50</span>
+  </div>
+  <div class="card-wrapper" id="fc-card" onclick="flipCard()">
+    <div class="card-inner" id="fc-inner">
+      <div class="card-face card-front">
+        <div class="card-hint">CLICK TO REVEAL DEFINITION</div>
+        <div class="card-term" id="fc-term"></div>
+        <div class="card-lesson" id="fc-lesson"></div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-def" id="fc-def"></div>
+      </div>
+    </div>
+  </div>
+  <div class="fc-nav">
+    <button class="fc-nav-btn" onclick="prevCard()">← PREV</button>
+    <button class="fc-nav-btn" onclick="nextCard()">NEXT →</button>
+  </div>
+</div>
+
+<!-- STUDY GUIDE PANEL -->
+<div id="panel-study" class="panel">
+  <div id="study-accordion"></div>
+</div>
+
+<!-- CRITICAL THINKING PANEL -->
+<div id="panel-critical" class="panel">
+  <div class="section-title">CRITICAL THINKING QUESTIONS</div>
+  <div id="critical-container"></div>
+</div>
+
+<script>
+// =============================================
+// QUESTION BANK — 150 QUESTIONS
+// =============================================
+const QB = [
+// ===== LESSON 1: HARD (25) =====
+{l:1,d:"hard",cat:"Elements",q:"Which of the 4 elements of a computer system refers to the tangible, physical components you can physically touch?",o:["Software","Data","Hardware","Communications"],a:2,e:"Hardware refers to the physical/tangible components of a computer system — the parts you can see and touch, like the CPU, RAM, keyboard, monitor, etc."},
+{l:1,d:"hard",cat:"Elements",q:"What element of a computer system manages the network connections and data transmission between computers?",o:["Hardware","Software","Data","Communications"],a:3,e:"Communications encompasses the network infrastructure, protocols, and connections that allow computers to exchange data with each other."},
+{l:1,d:"hard",cat:"CPU",q:"What is the primary function of the Control Unit (CU) in a CPU?",o:["Perform arithmetic operations","Execute logic comparisons","Fetch, decode, and execute instructions","Store frequently used data"],a:2,e:"The Control Unit (CU) manages the fetch-decode-execute cycle. It fetches instructions from memory, decodes them, and coordinates execution across all CPU components."},
+{l:1,d:"hard",cat:"CPU",q:"Which CPU component performs mathematical calculations like addition and subtraction?",o:["Control Unit","Bus Interface Unit","Registers","Arithmetic Logic Unit"],a:3,e:"The ALU (Arithmetic Logic Unit) handles all arithmetic (add, subtract, multiply, divide) and logic (AND, OR, NOT, comparisons) operations."},
+{l:1,d:"hard",cat:"Storage",q:"In the storage hierarchy, which storage type is the FASTEST?",o:["L1 Cache","RAM","Registers","L2 Cache"],a:2,e:"CPU Registers are at the top of the storage hierarchy — they are the fastest storage, located directly inside the CPU, but extremely small in size."},
+{l:1,d:"hard",cat:"Storage",q:"What is primary storage primarily used for in a computer system?",o:["Permanent data archiving","Long-term file storage","Temporary working memory for active processes","Backup storage"],a:2,e:"Primary storage (RAM) holds data and programs currently in use by the CPU. It is volatile — data is lost when power is removed."},
+{l:1,d:"hard",cat:"Categories",q:"Which computer category is specifically designed for high-performance scientific calculations and simulations?",o:["Mainframe","Workstation","Network Server","Supercomputer"],a:3,e:"Supercomputers are purpose-built for massive parallel processing used in weather forecasting, nuclear simulations, AI research, and scientific computation."},
+{l:1,d:"hard",cat:"Categories",q:"A desktop computer designed for specialized professional work like 3D rendering or engineering simulations is called a:",o:["Personal Computer","Mainframe","Workstation","Game Console"],a:2,e:"Workstations are high-performance desktops optimized for professional tasks requiring more processing power than a standard PC."},
+{l:1,d:"hard",cat:"Hardware",q:"Which component acts as an intermediary between the CPU and other system components on the motherboard?",o:["RAM","I/O Bridge","Hard Drive","Power Supply"],a:1,e:"The I/O Bridge (also called chipset) connects the CPU to memory and I/O systems, managing data flow between the processor and other components."},
+{l:1,d:"hard",cat:"Hardware",q:"What does 'peripheral device' refer to in computer hardware?",o:["The CPU and RAM","External devices connected to the main system","The motherboard chipset","The system bus"],a:1,e:"Peripheral devices are external hardware components connected to a computer — input devices (keyboard, mouse) and output devices (monitor, printer)."},
+{l:1,d:"hard",cat:"Storage",q:"Secondary storage differs from primary storage primarily because it is:",o:["Faster but smaller","Volatile and temporary","Non-volatile and permanent","Located inside the CPU"],a:2,e:"Secondary storage (HDD, SSD, optical discs) retains data even when power is off (non-volatile), unlike primary storage (RAM) which is volatile."},
+{l:1,d:"hard",cat:"CPU",q:"The Bus Interface Unit in a CPU is responsible for:",o:["Performing floating-point math","Managing data movement between CPU and system bus","Storing the program counter","Executing branch instructions"],a:1,e:"The Bus Interface Unit manages all communication between the CPU and the external system bus, controlling data transfer to/from memory and I/O devices."},
+{l:1,d:"hard",cat:"Categories",q:"Which type of server is typically characterized by its compact, modular design that slots into a chassis and shares power/cooling?",o:["Tower Server","Rack Server","Blade Server","Mainframe"],a:2,e:"Blade servers are ultra-thin, modular server boards that slide into a shared chassis (blade enclosure) which provides power, cooling, and networking."},
+{l:1,d:"hard",cat:"Storage",q:"Cache memory in the storage hierarchy sits between:",o:["Registers and Secondary Storage","RAM and Secondary Storage","Registers and RAM","CPU and Registers"],a:2,e:"Cache memory sits between CPU registers and main RAM. It stores frequently accessed data closer to the CPU to reduce the speed gap between fast processors and slower RAM."},
+{l:1,d:"hard",cat:"Categories",q:"Smartphones are classified under which broader computer category?",o:["Tablet Computers","Mobile Computers","Game Consoles","Embedded Systems"],a:1,e:"Smartphones fall under the Mobile Computer category, characterized by portability, touch interfaces, wireless connectivity, and battery power."},
+{l:1,d:"hard",cat:"Hardware",q:"What is the role of the 'Memory Bus' in a computer system?",o:["Connects CPU to GPU","Provides pathway between CPU/I-O Bridge and RAM","Links secondary storage to CPU","Connects peripheral devices to I/O ports"],a:1,e:"The Memory Bus is a dedicated pathway that connects the processor (via I/O Bridge) to RAM, enabling fast data transfer between primary storage and the CPU."},
+{l:1,d:"hard",cat:"Supercomputer",q:"Where is the El Capitan supercomputer located?",o:["Oak Ridge National Laboratory, Tennessee","Argonne National Laboratory, Illinois","Lawrence Livermore National Laboratory, California","MIT Lincoln Laboratory, Massachusetts"],a:2,e:"El Capitan is located at Lawrence Livermore National Laboratory (LLNL) in Livermore, California. It achieved #1 ranking on the TOP500 list."},
+{l:1,d:"hard",cat:"Categories",q:"Mainframe computers differ from supercomputers primarily in that mainframes are optimized for:",o:["Raw floating-point computation speed","High-volume transaction processing and reliability","Gaming and graphics rendering","Portable field operations"],a:1,e:"Mainframes excel at high-volume, reliable transaction processing (banking, airline reservations) with massive I/O throughput, while supercomputers focus on raw calculation speed."},
+{l:1,d:"hard",cat:"Storage",q:"Virtual memory is best described as:",o:["A type of non-volatile flash storage","Extra RAM added to a motherboard","Disk space used to simulate additional RAM","A cache layer between L2 and L3"],a:2,e:"Virtual memory uses a portion of secondary storage (usually HDD/SSD) as an extension of RAM, allowing the system to run programs larger than physical RAM."},
+{l:1,d:"hard",cat:"Elements",q:"In the 4 elements model, 'Data' specifically refers to:",o:["Executable program code","The operating system","Raw facts and figures processed by hardware/software","Network transmission signals"],a:2,e:"Data refers to raw, unprocessed facts, numbers, and figures that the computer processes. Software processes data into useful information."},
+{l:1,d:"hard",cat:"CPU",q:"What is the purpose of registers in CPU architecture?",o:["Store BIOS firmware permanently","Hold data/instructions immediately needed by the CPU","Manage network interface communications","Control power delivery to CPU cores"],a:1,e:"Registers are tiny, ultra-fast storage locations directly inside the CPU that temporarily hold data, instructions, and addresses the processor is actively using."},
+{l:1,d:"hard",cat:"Categories",q:"A game console is best classified as what type of computing device?",o:["General-purpose computer","Specialized computing device","Mobile computer","Network server"],a:1,e:"Game consoles are specialized computing devices optimized specifically for gaming, featuring custom CPUs, GPUs, and software ecosystems designed for interactive entertainment."},
+{l:1,d:"hard",cat:"Hardware",q:"Which bus connects I/O devices like USB controllers and network cards to the system?",o:["Memory Bus","Front Side Bus","I/O Bus","System Bus"],a:2,e:"The I/O Bus connects peripheral/I/O devices (USB, network, audio controllers) to the rest of the system through the I/O Bridge/chipset."},
+{l:1,d:"hard",cat:"Storage",q:"L1, L2, and L3 refer to different levels of which storage component?",o:["RAM modules","Virtual memory partitions","Cache memory","Register sets"],a:2,e:"L1, L2, and L3 are the three levels of cache memory. L1 is smallest/fastest (on CPU core), L2 is medium, L3 is largest/slowest but still much faster than RAM."},
+{l:1,d:"hard",cat:"Supercomputer",q:"What is the primary power consumption of the El Capitan supercomputer?",o:["5.2 megawatts","12.8 megawatts","29.5 megawatts","47.1 megawatts"],a:2,e:"El Capitan consumes approximately 29.5 megawatts of power — equivalent to powering tens of thousands of homes — making energy efficiency a critical design consideration."},
+
+// ===== LESSON 1: HARDER (25) =====
+{l:1,d:"harder",cat:"CPU",q:"In the fetch-decode-execute cycle, what happens FIRST?",o:["The ALU performs the operation","The Control Unit decodes the instruction","The CPU fetches the next instruction from memory","The result is stored back to registers"],a:2,e:"The cycle begins with FETCH — the Control Unit retrieves the next instruction from memory (pointed to by the Program Counter). Then it decodes, then executes."},
+{l:1,d:"harder",cat:"Storage",q:"Why does storage capacity INCREASE as you move DOWN the storage hierarchy?",o:["Lower levels use more expensive materials","Technology is older and inefficient at lower levels","Lower levels trade speed for size — they're cheaper per bit but slower","Electrical resistance increases with distance from CPU"],a:2,e:"The hierarchy reflects cost/speed tradeoffs. Registers/Cache are fast but expensive per bit (tiny capacity). HDDs/SSDs are cheap per bit, allowing massive capacity but are much slower."},
+{l:1,d:"harder",cat:"Supercomputer",q:"El Capitan uses AMD MI300A processors. What is unique about the MI300A architecture?",o:["It combines CPU and GPU on separate dies","It is a pure GPU chip with no CPU capability","It is an Accelerated Processing Unit (APU) combining CPU, GPU, and HBM memory in one package","It uses ARM architecture instead of x86"],a:2,e:"The AMD MI300A is an APU (Accelerated Processing Unit) that uniquely integrates CPU cores, GPU compute, and High Bandwidth Memory (HBM3) in a single package, improving data bandwidth."},
+{l:1,d:"harder",cat:"CPU",q:"The Program Counter (PC) in CPU architecture is responsible for:",o:["Counting executed instructions for benchmarking","Storing the memory address of the NEXT instruction to execute","Tracking CPU clock speed","Managing cache hit/miss ratios"],a:1,e:"The Program Counter (PC) is a special register that always contains the memory address of the next instruction to be fetched and executed."},
+{l:1,d:"harder",cat:"Categories",q:"Which factor MOST distinguishes a workstation from a standard desktop PC?",o:["Physical size of the tower","Consumer-grade GPU","Optimized for professional workloads with ECC RAM and powerful CPUs","Wireless connectivity features"],a:2,e:"Workstations use ECC (Error-Correcting Code) RAM, professional-grade GPUs (Quadro/FirePro), and multi-core Xeon/Ryzen Threadripper CPUs for CAD, video editing, and scientific work."},
+{l:1,d:"harder",cat:"Storage",q:"If an application experiences a 'page fault', this means:",o:["The application has crashed fatally","Required data is not in RAM and must be loaded from virtual memory/disk","A hardware RAM module has failed","The cache has been cleared"],a:1,e:"A page fault occurs when the CPU requests data/code not currently in RAM. The OS must load it from virtual memory (disk swap space), which is significantly slower than RAM access."},
+{l:1,d:"harder",cat:"Hardware",q:"What is the function of the 'northbridge' in traditional motherboard architecture?",o:["Manages USB and SATA connections","Connects CPU to high-speed components like RAM and GPU","Controls audio and network chips","Handles power delivery to peripherals"],a:1,e:"The Northbridge (part of the chipset) managed high-bandwidth connections between the CPU, RAM, and GPU. Modern CPUs have integrated memory controllers, making Northbridge largely obsolete."},
+{l:1,d:"harder",cat:"Categories",q:"A rack server differs from a blade server primarily in that a rack server:",o:["Is designed for desktop deployment","Is a complete self-contained unit with its own power supply","Shares a chassis backplane with other blades","Requires proprietary vendor hardware only"],a:1,e:"Rack servers are complete 1U-4U self-contained units with their own power supply and cooling, mounted in standard 19-inch racks. Blade servers share chassis infrastructure."},
+{l:1,d:"harder",cat:"Storage",q:"Cache memory achieves its speed advantage primarily through:",o:["Using the same technology as regular RAM but at higher voltage","Proximity to CPU and use of SRAM (Static RAM) instead of DRAM","Larger storage capacity allowing more pre-loading","Parallel access paths using multiple buses simultaneously"],a:1,e:"Cache uses SRAM (Static RAM) which doesn't need refresh cycles unlike DRAM, and is located extremely close to (or inside) the CPU, dramatically reducing access latency."},
+{l:1,d:"harder",cat:"Supercomputer",q:"How does El Capitan's performance (2.746 exaFLOPS) compare to Frontier's (1.194 exaFLOPS)?",o:["El Capitan is about 1.5x faster","El Capitan is about 2.3x faster","El Capitan is about 4x faster","El Capitan is about 10x faster"],a:1,e:"2.746 ÷ 1.194 ≈ 2.3x. El Capitan is approximately 2.3 times more powerful than Frontier in peak performance. Both are exascale machines exceeding 10^18 FLOPS."},
+{l:1,d:"harder",cat:"Elements",q:"How does 'software' relate to 'data' in the 4-elements model?",o:["Software and data are the same thing","Software contains data permanently embedded within it","Software processes data to produce useful information/output","Data controls software execution directly"],a:2,e:"Software (programs) takes raw data as input, processes it according to programmed instructions, and produces useful information as output. They are distinct but interdependent elements."},
+{l:1,d:"harder",cat:"CPU",q:"What is the significance of the L1 cache 'hit rate' for CPU performance?",o:["Higher hit rate means more cache misses","Higher hit rate means more data found in L1, reducing need to access slower L2/RAM","L1 hit rate affects GPU performance not CPU","Hit rate only matters for disk I/O operations"],a:1,e:"L1 cache hit rate measures how often requested data is found in L1 cache. Higher hit rates mean less need to access slower L2, L3, or RAM, significantly improving CPU performance."},
+{l:1,d:"harder",cat:"Categories",q:"What characteristic makes mainframe computers uniquely suited for banking and airline industries?",o:["Extremely high graphics rendering capability","Ultra-high I/O throughput, reliability (99.999% uptime), and simultaneous user support","Superior scientific floating-point computation","Low cost compared to server clusters"],a:1,e:"Mainframes offer 5-nines reliability (99.999% uptime), handle thousands of concurrent transactions/second, and have built-in fault tolerance — critical for banking and reservations systems."},
+{l:1,d:"harder",cat:"Storage",q:"The term 'volatile' in computer storage means:",o:["The storage medium is physically unstable","Data is lost when power is removed","Data can be written at extremely high speeds","Storage uses chemical reactions to retain data"],a:1,e:"Volatile storage (like RAM) loses all data when power is removed. Non-volatile storage (HDD, SSD, ROM) retains data without power."},
+{l:1,d:"harder",cat:"Hardware",q:"In a computer's flow diagram, what connects the CPU to both the memory bus and I/O bus?",o:["The graphics card","The power supply unit","The I/O Bridge (chipset)","The BIOS chip"],a:2,e:"The I/O Bridge (chipset) is the central hub connecting the CPU to the Memory Bus (RAM side) and I/O Bus (peripherals side), managing data routing between all subsystems."},
+{l:1,d:"harder",cat:"Categories",q:"Which best describes the computational difference between a tablet and a smartphone?",o:["Tablets use desktop CPUs while smartphones use mobile CPUs","There is essentially no computational difference, only size","Tablets typically have larger screens and batteries but similar mobile processors","Tablets always have more RAM than smartphones"],a:2,e:"Modern tablets and smartphones use the same category of mobile processors (ARM-based SoCs). Key differences are physical size, battery capacity, and use-case optimization."},
+{l:1,d:"harder",cat:"Supercomputer",q:"An exaFLOP equals how many floating-point operations per second?",o:["10^12 (one trillion)","10^15 (one quadrillion)","10^18 (one quintillion)","10^21 (one sextillion)"],a:2,e:"Exa- prefix = 10^18. One exaFLOP = 10^18 (one quintillion) floating-point operations per second. El Capitan at 2.746 exaFLOPS = 2.746 × 10^18 FLOPS."},
+{l:1,d:"harder",cat:"Storage",q:"Why is virtual memory slower than physical RAM?",o:["Virtual memory uses older chip technology","Virtual memory must be accessed from disk (HDD/SSD) which has much higher latency","Virtual memory operates at lower voltage","Virtual memory shares bandwidth with cache"],a:1,e:"Virtual memory is stored on disk (HDD/SSD), which has access times measured in milliseconds vs RAM's nanoseconds — making disk access 100,000x+ slower than RAM."},
+{l:1,d:"harder",cat:"CPU",q:"Multiple cache levels (L1, L2, L3) exist because:",o:["Regulations require redundant storage at each level","L1 alone would need to be impractically large to be effective","Different instruction sets require separate caches","Only one level can be accessed at a time"],a:1,e:"A hierarchy allows small, extremely fast L1 per core, larger L2, and even larger shared L3. This balances speed and capacity — making L1 large enough to be useful while keeping it fast."},
+{l:1,d:"harder",cat:"Elements",q:"The 'communications' element in early standalone computers was largely absent. What changed this?",o:["Invention of the transistor","Development of network protocols and internet infrastructure","Improvement in CPU clock speeds","Invention of the hard disk drive"],a:1,e:"The development of networking protocols (TCP/IP), ARPAnet, and eventually the Internet transformed communications from absent to essential in all modern computer systems."},
+{l:1,d:"harder",cat:"Hardware",q:"What is the 'system bus' and why is it a potential bottleneck?",o:["It's the OS scheduling system for threads","A shared communication pathway between CPU, memory, and I/O — limited bandwidth restricts parallel data transfer","A backup power circuit for stable voltage","The slot connector for RAM modules"],a:1,e:"The system bus is the main communication pathway. As CPU speeds increased dramatically, bus bandwidth couldn't keep pace, creating a 'memory wall' bottleneck limiting overall performance."},
+{l:1,d:"harder",cat:"Categories",q:"The term 'server farm' refers to:",o:["Agricultural operations that use IoT sensors","A large collection of servers housed in a data center","A single high-performance mainframe computer","Distributed computing using volunteer PCs"],a:1,e:"A server farm (data center) is a facility housing large numbers of servers providing computing services, hosting websites, cloud platforms, and enterprise applications at scale."},
+{l:1,d:"harder",cat:"Storage",q:"SSD (Solid State Drive) is superior to HDD (Hard Disk Drive) primarily because:",o:["SSDs have greater storage capacity","SSDs use spinning platters for faster seek time","SSDs have no moving parts, giving faster access and better shock resistance","SSDs are always cheaper per gigabyte"],a:2,e:"SSDs use flash memory with no mechanical parts, enabling much faster random access (microseconds vs milliseconds for HDD), lower power use, and resistance to physical shock."},
+{l:1,d:"harder",cat:"CPU",q:"What would happen if the ALU were removed from a CPU?",o:["Only graphics processing would fail","The CPU could still run but slower","The computer could not perform any calculations or logical comparisons","Only network functions would fail"],a:2,e:"The ALU performs ALL arithmetic and logical operations. Without it, the CPU could not compute anything — no math, no comparisons, no program logic could execute."},
+{l:1,d:"harder",cat:"Categories",q:"Network servers differ from other computer categories because they are primarily designed to:",o:["Run personal productivity software","Process massive floating-point scientific data","Provide services and resources to client computers on a network","Serve as standalone workstations"],a:2,e:"Network servers exist to provide services (file storage, web hosting, email, databases) to other computers (clients) on a network, optimized for uptime, I/O throughput, and multi-user access."},
+
+// ===== LESSON 1: HARDEST (25) =====
+{l:1,d:"hardest",cat:"CPU-Deep",q:"A CPU's 'clock speed' determines the rate at which it executes instructions. If a modern CPU has multiple execution units, why does clock speed alone NOT fully describe performance?",o:["Clock speed is irrelevant in modern CPUs","Modern CPUs can execute multiple instructions per clock cycle (IPC) making total throughput = clock × IPC","Thermal throttling always reduces clock speed to zero","Only memory bandwidth determines performance"],a:1,e:"Instruction Per Clock (IPC) measures how many instructions complete per cycle. A CPU at 3GHz with IPC=4 outperforms a 4GHz CPU with IPC=2. Total performance = Clock Speed × IPC × Core Count."},
+{l:1,d:"hardest",cat:"Storage-Deep",q:"In a computer with 8GB RAM but a program requiring 12GB, virtual memory compensates. Which scenario correctly describes the performance impact?",o:["Performance improves because more data is accessible","Performance degrades severely — frequent disk access creates 'thrashing'","Performance is identical to having 12GB RAM","The program simply cannot run at all"],a:1,e:"'Thrashing' occurs when the OS constantly swaps pages between RAM and disk. Disk access is ~100,000x slower than RAM, causing catastrophic performance degradation."},
+{l:1,d:"hardest",cat:"Architecture",q:"Why does cache coherence become a critical problem in multi-core processors?",o:["Multiple cores create electrical interference in cache circuits","Each core has its own L1/L2 cache — if one core modifies data, other cores may have stale copies in their caches","Multi-core CPUs cannot use L3 cache simultaneously","Cache coherence only matters in GPU architectures"],a:1,e:"With multiple cores each having private caches, a write to memory by Core A may not immediately reflect in Core B's cache. Cache coherence protocols (MESI) ensure all cores see consistent data."},
+{l:1,d:"hardest",cat:"Supercomputer-Deep",q:"El Capitan was built for $600M and uses 29.5 MW of power. Assuming $0.10/kWh electricity, approximately what is the ANNUAL electricity cost alone?",o:["~$2.6 million/year","~$25.8 million/year","~$142 million/year","~$600 million/year"],a:1,e:"29,500 kW × 8,760 hours/year × $0.10/kWh = ~$25.8 million/year in electricity. This illustrates why energy efficiency (performance per watt) is a critical metric in HPC design."},
+{l:1,d:"hardest",cat:"Architecture",q:"The Von Neumann bottleneck refers to the limitation that:",o:["CPUs can only execute one instruction type per cycle","Instructions and data share the same bus/memory, limiting simultaneous instruction fetch and data access","RAM cannot be addressed in 64-bit systems","Cache cannot store floating-point values"],a:1,e:"Von Neumann architecture uses a single bus/memory for both data and instructions. Since only one can transit the bus at a time, this creates a fundamental throughput bottleneck — the 'von Neumann bottleneck'."},
+{l:1,d:"hardest",cat:"Storage-Deep",q:"Which correctly orders these storage types from HIGHEST to LOWEST bandwidth (data transfer rate)?",o:["RAM > L3 Cache > L2 Cache > L1 Cache","L1 Cache > L2 Cache > L3 Cache > RAM","HDD > SSD > RAM > Cache","RAM > SSD > L1 Cache > Registers"],a:1,e:"Bandwidth hierarchy: L1 Cache (~1TB/s) > L2 Cache (~500GB/s) > L3 Cache (~200GB/s) > RAM (~50-100GB/s) > SSD (~7GB/s) > HDD (~200MB/s). Faster = higher bandwidth."},
+{l:1,d:"hardest",cat:"CPU-Deep",q:"'Pipelining' in CPU design means:",o:["Cooling liquid is piped through the CPU heatsink","Overlapping execution stages — while one instruction executes, the next is being decoded, and the one after is being fetched","Connecting multiple CPUs with high-speed cables","Routing all I/O through a single bus"],a:1,e:"Pipelining divides instruction execution into stages (Fetch→Decode→Execute→Writeback) and overlaps them like an assembly line, allowing throughput of one instruction per cycle rather than waiting for each to complete."},
+{l:1,d:"hardest",cat:"Categories-Deep",q:"Why would a research facility choose a supercomputer over a cloud computing cluster for nuclear simulation?",o:["Cloud computing cannot run any scientific software","Supercomputers are always cheaper than cloud","Supercomputers offer deterministic latency, custom interconnects, and sustained performance without virtualization overhead critical for tightly-coupled simulations","Cloud servers have lower security"],a:2,e:"Nuclear simulations require MPI communication between thousands of nodes with microsecond latency. Custom interconnects (like InfiniBand) and dedicated hardware ensure no virtualization overhead or noisy-neighbor effects that cloud environments have."},
+{l:1,d:"hardest",cat:"Hardware-Deep",q:"Non-Uniform Memory Access (NUMA) architecture in modern servers means:",o:["All RAM is equidistant from all CPU cores","Different CPU sockets have faster access to their local RAM than to RAM attached to other sockets","Memory access time increases proportionally with data size","Cache and RAM access speeds are unified"],a:1,e:"In multi-socket servers, each CPU has local RAM banks it can access quickly, and remote RAM (attached to other CPUs) that takes longer to access. Software must be NUMA-aware to achieve peak performance."},
+{l:1,d:"hardest",cat:"Storage-Deep",q:"NAND flash SSD cells degrade over time due to:",o:["Magnetic field interference from nearby HDDs","Write amplification — each write erases and rewrites entire memory blocks, wearing out the oxide layer","Thermal expansion of silicon during operation","Cosmic ray bit-flipping events"],a:1,e:"NAND flash has a finite program/erase (P/E) cycle count per cell (~3,000-100,000 cycles). Each write amplifies as the controller must erase entire blocks even for small changes, gradually degrading cells."},
+{l:1,d:"hardest",cat:"CPU-Deep",q:"Speculative execution in modern CPUs improves performance by:",o:["Reducing power consumption during idle cycles","Executing instructions ahead of time based on predicted branch outcomes, discarding results if prediction was wrong","Cloning instructions across all CPU cores simultaneously","Pre-loading all data into L1 cache at boot"],a:1,e:"CPUs predict which branch of an if/else will execute and run it speculatively. If correct, time is saved; if wrong, results are discarded. This is the basis of Spectre/Meltdown vulnerabilities (2018)."},
+{l:1,d:"hardest",cat:"Architecture",q:"What is the key architectural difference between RISC and CISC instruction sets?",o:["RISC is only used in supercomputers","RISC uses simple, fixed-length instructions executing in one cycle; CISC uses complex variable-length instructions that may take multiple cycles","CISC CPUs have no ALU component","RISC processors cannot access RAM directly"],a:1,e:"RISC (ARM, MIPS): few, simple instructions of fixed length — fast, power efficient. CISC (x86): many complex variable-length instructions — more work per instruction but more complexity. ARM dominates mobile; x86 dominates PCs."},
+{l:1,d:"hardest",cat:"Hardware-Deep",q:"ECC (Error-Correcting Code) RAM, commonly used in workstations and servers, provides what advantage?",o:["Faster memory bandwidth than standard DDR","Detects and corrects single-bit memory errors automatically, preventing data corruption","Lower power consumption than non-ECC RAM","Enables higher overclocking potential"],a:1,e:"ECC RAM uses additional bits to detect and correct single-bit errors in real time. Critical for servers/workstations where data corruption could cause financial loss, patient harm, or system crashes."},
+{l:1,d:"hardest",cat:"Storage-Deep",q:"The 'memory wall' problem in computer architecture refers to:",o:["Physical limitations of RAM module height in server racks","Growing speed gap between CPU processing speed and memory access speed, causing CPUs to stall waiting for data","Limitation on the maximum addressable memory in 32-bit systems","Security boundary between user and kernel memory space"],a:1,e:"Since the 1990s, CPU speeds improved much faster than RAM latency/bandwidth. CPUs now stall billions of cycles per second waiting for data from RAM — the memory wall requires caches/prefetching to mitigate."},
+{l:1,d:"hardest",cat:"Categories-Deep",q:"Quantum computers differ fundamentally from classical computers described in BES 103 because they:",o:["Use faster versions of the same binary logic","Process qubits that can exist in superposition of 0 and 1 simultaneously, enabling certain algorithms to run exponentially faster","Are simply a marketing name for very fast supercomputers","Use optical components instead of silicon transistors"],a:1,e:"Quantum computers use qubits in superposition and entanglement to explore multiple solution paths simultaneously. For specific problems (factoring, optimization, simulation), they offer exponential speedups — but are not faster for general computing."},
+{l:1,d:"hardest",cat:"CPU-Deep",q:"Why does increasing the number of CPU cores NOT always proportionally increase application performance?",o:["More cores generate too much heat, causing throttling","Applications must be explicitly written with parallel/multi-threaded code to utilize multiple cores; serial code runs on only one core","Each additional core reduces the clock speed of all cores","The OS can only schedule one thread per CPU"],a:1,e:"Amdahl's Law: overall speedup is limited by the sequential (non-parallelizable) portion of code. A program that's 50% sequential can never exceed 2x speedup no matter how many cores are added."},
+{l:1,d:"hardest",cat:"Architecture",q:"Harvard architecture differs from Von Neumann architecture in that Harvard architecture:",o:["Uses separate buses and memory for instructions and data, enabling simultaneous fetch of both","Combines all computation in a single ALU","Only supports RISC instruction sets","Requires dual CPUs for operation"],a:0,e:"Harvard architecture uses physically separate storage and pathways for instructions and data. This allows fetching the next instruction and reading data simultaneously, eliminating the Von Neumann bottleneck — used in most modern CPUs' cache design."},
+{l:1,d:"hardest",cat:"Storage-Deep",q:"In the storage hierarchy context, 'temporal locality' means:",o:["Data stored near its creation timestamp loads faster","Recently accessed data is likely to be accessed again soon — the basis for cache effectiveness","Data physically closer to the CPU is accessed more often","Files modified recently are prefetched to RAM"],a:1,e:"Temporal locality is a key principle: data accessed recently is likely to be accessed again soon. Caches exploit this by keeping recently used data nearby. Spatial locality (nearby addresses) is the complementary principle."},
+{l:1,d:"hardest",cat:"Hardware-Deep",q:"What is 'thermal throttling' and how does it affect the storage hierarchy?",o:["CPU performance is reduced when temperature exceeds safe limits, slowing all processing including cache access","Thermal throttling only affects GPU not CPU","Throttling speeds up RAM access to compensate for CPU slowdown","It is a RAM error correction mechanism"],a:0,e:"When CPU temperature exceeds safe limits (typically 95-105°C), the processor automatically reduces clock speed and voltage. This slows all operations including cache access rates, reducing overall system performance."},
+{l:1,d:"hardest",cat:"Supercomputer-Deep",q:"El Capitan is used for nuclear weapons stockpile stewardship. What does this mean from a national security perspective?",o:["It simulates nuclear explosions virtually instead of physical testing","It controls the launch systems for nuclear weapons","It manages the nuclear weapons inventory database","It encrypts classified communications between facilities"],a:0,e:"Since the 1992 US nuclear testing moratorium, the US cannot conduct physical nuclear tests. Supercomputers like El Capitan simulate nuclear weapons behavior to certify stockpile safety and reliability without actual detonations."},
+{l:1,d:"hardest",cat:"Architecture",q:"What is 'direct memory access' (DMA) and why is it important for system performance?",o:["A security feature preventing programs from accessing system memory","Allows I/O devices to transfer data directly to RAM without CPU involvement, freeing the CPU for other work","A type of RAM with direct CPU register integration","A cache pre-loading technique for sequential data"],a:1,e:"DMA allows peripherals (NIC, disk controller) to transfer data directly to/from RAM without requiring the CPU to manage each byte. This offloads I/O management from the CPU, dramatically improving overall performance."},
+{l:1,d:"hardest",cat:"Storage-Deep",q:"3D NAND technology in modern SSDs improves storage density by:",o:["Using smaller 2D cells with higher voltage","Stacking memory cells vertically in multiple layers (64-256+ layers) rather than only horizontally","Using liquid cooling to enable denser packing","Applying error correction to allow smaller less-reliable cells"],a:1,e:"3D NAND stacks cell layers vertically (V-NAND), allowing dramatically more cells per unit area than planar 2D NAND. Modern SSDs use 176-232+ layer 3D NAND for high density and improved reliability."},
+{l:1,d:"hardest",cat:"CPU-Deep",q:"Branch prediction in CPUs becomes a security vulnerability in Spectre because:",o:["Branch prediction stores passwords in predictable cache locations","Speculative execution accesses memory speculatively — side-channel timing attacks can infer the contents of unauthorized memory by measuring cache timing","Branch predictors disable antivirus software","Misprediction crashes expose kernel memory directly"],a:1,e:"Spectre exploits speculative execution: the CPU speculatively accesses secret data, which loads into cache. Although the speculative result is discarded, the data remains in cache. Attackers measure cache access timing to infer secret values."},
+{l:1,d:"hardest",cat:"Categories-Deep",q:"A 'server farm' serving millions of web users typically employs which architectural strategy to handle load?",o:["A single very powerful mainframe with proprietary OS","Homogeneous clusters with identical blade servers using load balancing to distribute requests","Sequential processing — each request waits in queue","Dedicated supercomputer nodes per 1,000 users"],a:1,e:"Modern web-scale infrastructure uses horizontal scaling — many commodity servers in clusters managed by load balancers. This provides redundancy, scalability, and cost efficiency that single large machines cannot match economically."},
+{l:1,d:"hardest",cat:"Architecture",q:"What is the key trade-off when increasing CPU die size to add more cache?",o:["Larger dies always perform better with no downside","Larger dies cost more to manufacture (lower yield per wafer) and consume more power, but reduce cache misses","Larger dies require slower clock speeds","Cache cannot be integrated on the CPU die at all"],a:1,e:"Bigger CPU die = more cache = fewer misses. But manufacturing cost rises quadratically with die size (lower yield), and power consumption increases. CPU designers optimize for performance-per-watt and performance-per-dollar, not just raw performance."},
+
+// ===== LESSON 4: HARD (25) =====
+{l:4,d:"hard",cat:"History",q:"In what year was ARPAnet established, which is considered the predecessor to the Internet?",o:["1958","1965","1969","1975"],a:2,e:"ARPAnet was established in 1969 by DARPA (US Department of Defense). It initially connected 4 nodes: UCLA, Stanford Research Institute, UC Santa Barbara, and University of Utah."},
+{l:4,d:"hard",cat:"History",q:"The World Wide Web was released to the public by Tim Berners-Lee in what year?",o:["1983","1989","1991","1995"],a:2,e:"Tim Berners-Lee released the World Wide Web in 1991 while working at CERN. He invented HTML, HTTP, and the URL system to create a hyperlinked document system."},
+{l:4,d:"hard",cat:"History",q:"DARPA was founded in response to which historical event?",o:["The Korean War","The Soviet Sputnik satellite launch in 1957","The Cuban Missile Crisis","The fall of the Berlin Wall"],a:1,e:"DARPA (Defense Advanced Research Projects Agency) was founded in 1958 as a direct US government response to the Soviet Union's Sputnik launch, to ensure US technological superiority."},
+{l:4,d:"hard",cat:"LAN",q:"What does MAC address stand for, and what makes it unique?",o:["Memory Access Code — assigned by the OS","Media Access Control — hardware-burned unique identifier for each network device","Managed Authentication Certificate — issued by DHCP","Multiple Access Channel — for wireless networks only"],a:1,e:"MAC (Media Access Control) address is a unique 48-bit hardware identifier burned into network interface cards at manufacturing. It operates at Layer 2 (Data Link) of the OSI model."},
+{l:4,d:"hard",cat:"LAN",q:"DHCP stands for Dynamic Host Configuration Protocol. Its primary function is:",o:["Encrypting data between devices","Automatically assigning IP addresses to devices on a network","Translating domain names to IP addresses","Filtering incoming network packets"],a:1,e:"DHCP automatically assigns IP addresses, subnet masks, default gateway, and DNS server addresses to devices when they join a network, eliminating manual configuration."},
+{l:4,d:"hard",cat:"WWW",q:"The WWW's 'structural view' consists of which four components?",o:["HTTP, HTML, URI, XML","Client, Server, Cache, Internet","DNS, URL, IP, TCP","Browser, Router, Switch, Firewall"],a:1,e:"The structural (architectural) view of the WWW comprises: Client (browser), Server (web server), Cache (proxy), and Internet (infrastructure connecting them)."},
+{l:4,d:"hard",cat:"WWW",q:"What protocol is foundational to the World Wide Web for transferring hypertext documents?",o:["FTP","SMTP","HTTP","TCP"],a:2,e:"HTTP (HyperText Transfer Protocol) is the foundation of the Web. It defines how clients request resources and how servers respond. HTTPS is the encrypted version."},
+{l:4,d:"hard",cat:"DNS",q:"DNS (Domain Name System) is often called 'the phone book of the Internet' because it:",o:["Stores phone numbers associated with websites","Translates human-readable domain names into IP addresses","Manages physical network routing between continents","Assigns MAC addresses to domain names"],a:1,e:"DNS translates domain names (google.com) into IP addresses (142.250.4.100) that computers use to route traffic. Without DNS, users would need to memorize numeric IP addresses."},
+{l:4,d:"hard",cat:"URL",q:"In the URL 'https://www.usep.edu.ph/index.html', what does 'https' represent?",o:["The domain name","The file path","The transfer protocol","The country code"],a:2,e:"'https' is the protocol (HyperText Transfer Protocol Secure). It specifies how the browser should communicate with the server — in this case, using encrypted SSL/TLS connection."},
+{l:4,d:"hard",cat:"Security",q:"What is the primary function of a firewall in network security?",o:["Speed up internet connection","Assign IP addresses to devices","Monitor and filter incoming/outgoing network traffic based on security rules","Translate domain names to IP addresses"],a:2,e:"A firewall monitors all network traffic and enforces rules about which packets are allowed or blocked, creating a security boundary between trusted internal networks and untrusted external networks."},
+{l:4,d:"hard",cat:"LAN",q:"ARP (Address Resolution Protocol) is used to:",o:["Assign IP addresses automatically","Map IP addresses to MAC addresses within a local network","Translate domain names to IPs","Encrypt network traffic on LAN"],a:1,e:"ARP resolves Layer 3 IP addresses to Layer 2 MAC addresses on a local network. When a device knows the IP of another device on the same LAN, it broadcasts an ARP request to find its MAC address."},
+{l:4,d:"hard",cat:"LAN",q:"What is the role of a network switch in a LAN?",o:["Connect LAN to the Internet","Assign IP addresses to devices","Forward data frames to specific devices based on MAC addresses","Translate protocols between different networks"],a:2,e:"A switch operates at Layer 2 (Data Link) and uses a MAC address table to forward frames only to the specific port where the destination device is connected, unlike hubs which broadcast to all ports."},
+{l:4,d:"hard",cat:"Cloud",q:"Which cloud service model provides virtualized computing infrastructure (servers, storage, networking)?",o:["SaaS (Software as a Service)","PaaS (Platform as a Service)","IaaS (Infrastructure as a Service)","FaaS (Function as a Service)"],a:2,e:"IaaS provides virtualized infrastructure — VMs, storage, networking — that users manage. Examples: AWS EC2, Google Compute Engine, Azure VMs. PaaS adds runtime/middleware; SaaS provides complete applications."},
+{l:4,d:"hard",cat:"Protocols",q:"FTP (File Transfer Protocol) is specifically used for:",o:["Sending and receiving email","Translating domain names","Transferring files between computers over a network","Establishing encrypted VPN tunnels"],a:2,e:"FTP is a standard protocol for transferring files between a client and server over a TCP network. It operates on ports 20 (data) and 21 (control). SFTP/FTPS are secure alternatives."},
+{l:4,d:"hard",cat:"WWW",q:"In the WWW semantic view, HTML is used to:",o:["Route network packets","Define the structure and content of web pages","Encrypt data between client and server","Manage DNS resolution"],a:1,e:"HTML (HyperText Markup Language) is the standard markup language for creating web pages. It defines the structure, content, and semantic meaning of web documents using tags."},
+{l:4,d:"hard",cat:"History",q:"How many internet users existed worldwide in 2019 according to the lesson?",o:["1.2 billion","2.1 billion","4.39 billion","6.8 billion"],a:2,e:"According to BES 103 Lesson 4, there were approximately 4.39 billion internet users worldwide in 2019, representing over half the world's population at that time."},
+{l:4,d:"hard",cat:"LAN",q:"What is the difference between a modem and a gateway?",o:["They are the same device","Modem converts digital signals to analog/digital for ISP; gateway connects different networks","Gateway assigns IP addresses; modem provides wireless access","Modem filters traffic; gateway assigns MAC addresses"],a:1,e:"A modem (modulator-demodulator) converts digital data to signals compatible with your ISP's infrastructure (cable, DSL, fiber). A gateway is a router connecting different networks, often combining modem + router functions."},
+{l:4,d:"hard",cat:"Security",q:"HTTP cookies are small data files stored by the browser primarily to:",o:["Infect the computer with malware","Speed up DNS lookups","Maintain session state and user preferences across requests","Encrypt communications with web servers"],a:2,e:"Cookies allow web servers to maintain stateful sessions across stateless HTTP. They store session tokens, user preferences, login status, and tracking data on the client browser."},
+{l:4,d:"hard",cat:"LAN",q:"The IEEE 802.11 standard defines which type of networking technology?",o:["Ethernet wired LAN","Bluetooth personal area network","Wi-Fi wireless LAN","Fiber optic metropolitan area network"],a:2,e:"IEEE 802.11 defines the Wi-Fi family of wireless LAN protocols. Different variants (802.11a/b/g/n/ac/ax) define different frequencies, speeds, and ranges — with 802.11ax (Wi-Fi 6) being the latest common standard."},
+{l:4,d:"hard",cat:"WWW",q:"What distinguishes a web cache/proxy server from a regular web server?",o:["Cache servers only serve static HTML","Cache stores copies of frequently requested content to reduce load on origin servers and improve response time","Cache servers perform DNS resolution instead","Proxy servers replace HTTP with a custom protocol"],a:1,e:"A web cache/proxy sits between clients and origin servers, storing (caching) copies of frequently requested resources. When a client requests cached content, the proxy serves it directly without contacting the origin server, reducing latency and bandwidth."},
+{l:4,d:"hard",cat:"Cloud",q:"The primary financial advantage of cloud computing over on-premise infrastructure is:",o:["Cloud is always cheaper in every scenario","No advantage — cloud costs more in all cases","Capital expense (CAPEX) shifts to operational expense (OPEX) with pay-per-use pricing","Cloud eliminates the need for IT staff entirely"],a:2,e:"On-premise requires large upfront capital investment (servers, networking, facilities). Cloud converts this to operational expense — you pay only for what you use, improving cash flow and reducing financial risk for variable workloads."},
+{l:4,d:"hard",cat:"LAN",q:"Which company invented Ethernet, the foundational wired LAN technology?",o:["IBM","Intel","Xerox (with DEC and Intel)","Cisco"],a:2,e:"Ethernet was developed at Xerox PARC by Robert Metcalfe in 1973, then standardized as IEEE 802.3 in collaboration with DEC and Intel. It remains the dominant wired LAN technology."},
+{l:4,d:"hard",cat:"Protocols",q:"What does ISP stand for, and what service does it provide?",o:["Internet Service Provider — connects users to the Internet","Information Security Protocol — encrypts web traffic","Internal System Protocol — manages LAN routing","Interface Support Platform — manages hardware drivers"],a:0,e:"ISP (Internet Service Provider) is a company that provides Internet access to customers. ISPs connect to the Internet backbone and provide last-mile connectivity via cable, DSL, fiber, or wireless."},
+{l:4,d:"hard",cat:"WWW",q:"Web analytics refers to:",o:["The programming language used to build websites","Collection and analysis of website usage data to understand visitor behavior","The process of translating URLs to IP addresses","Optimization of web server hardware performance"],a:1,e:"Web analytics is the measurement, collection, and analysis of website data — page views, unique visitors, bounce rates, traffic sources — to understand user behavior and optimize website performance."},
+{l:4,d:"hard",cat:"Cloud",q:"'On-premise' IT infrastructure means:",o:["Software hosted externally by a third party","Computing resources owned, managed, and housed within the organization's own facilities","Any computing resource using the Internet","Hardware rented from a cloud provider"],a:1,e:"On-premise (on-prem) means the organization owns, operates, and maintains its own servers, networking, and storage in its own data center or server room, with full control and responsibility."},
+
+// ===== LESSON 4: HARDER (25) =====
+{l:4,d:"harder",cat:"History",q:"Packet switching, fundamental to the Internet, means that data:",o:["Is sent in a continuous stream over a dedicated circuit","Is divided into packets that may take different paths and are reassembled at the destination","Requires a direct physical connection maintained for entire session","Is broadcast to all nodes on the network simultaneously"],a:1,e:"Packet switching breaks data into packets, each independently routed through the network. They may arrive out of order via different paths and are reassembled at the destination — enabling efficient, resilient networking unlike circuit switching."},
+{l:4,d:"harder",cat:"LAN",q:"Why does every network device need both a MAC address AND an IP address?",o:["They serve the same purpose and are redundant","MAC addresses are for LAN communication (Layer 2); IP addresses are for internet routing (Layer 3) — together they enable end-to-end communication","MAC addresses are temporary; IP addresses are permanent","IP addresses are only used for wireless devices"],a:1,e:"MAC addresses work within a local network segment (Layer 2) for frame delivery. IP addresses enable routing across different networks (Layer 3). ARP bridges the two — mapping IP to MAC for local delivery."},
+{l:4,d:"harder",cat:"DNS",q:"The DNS resolution process for 'usep.edu.ph' involves which DNS server type LAST in the resolution chain?",o:["Root name server","TLD name server for .ph","Authoritative name server for usep.edu.ph","Recursive resolver at ISP"],a:2,e:"DNS resolution: Recursive resolver → Root server (for .ph) → TLD server (.ph) → Authoritative server (usep.edu.ph) which returns the actual IP. The authoritative server provides the definitive answer."},
+{l:4,d:"harder",cat:"Security",q:"What is the key security difference between HTTP and HTTPS?",o:["HTTPS is faster than HTTP","HTTPS encrypts data using SSL/TLS preventing eavesdropping and man-in-the-middle attacks","HTTPS only works on mobile devices","HTTP uses port 80 which is more secure than HTTPS port 443"],a:1,e:"HTTPS uses SSL/TLS encryption to protect data in transit. HTTP sends data in plain text — anyone intercepting traffic can read it. HTTPS provides confidentiality, integrity, and server authentication."},
+{l:4,d:"harder",cat:"URL",q:"In the URL 'http://www.example.com:8080/page?id=5#section', what does ':8080' represent?",o:["The IP address of the server","A port number specifying which service to connect to","The document version number","A session identifier"],a:1,e:"Port numbers specify which application service to connect to on the server. Default HTTP port is 80 (omitted when default), HTTPS is 443. Port 8080 is commonly used for development web servers."},
+{l:4,d:"harder",cat:"WWW",q:"XML in the WWW semantic view is primarily used for:",o:["Styling web page appearance","Executing server-side scripts","Describing and transporting structured data between systems","Compressing images for web delivery"],a:2,e:"XML (eXtensible Markup Language) is used to structure, store, and transport data. Unlike HTML (for presentation), XML is for data description. It's widely used in web services, APIs, and data exchange."},
+{l:4,d:"harder",cat:"LAN",q:"When your computer connects to a new Wi-Fi network, DHCP and ARP work in what sequence?",o:["ARP first identifies the router, then DHCP assigns IP","DHCP first assigns an IP address, then ARP can be used to resolve other devices' MACs","They operate simultaneously with no sequence","ARP is not involved in Wi-Fi connections"],a:1,e:"DHCP runs first (DORA process: Discover→Offer→Request→Acknowledge) to assign an IP. After getting an IP, the device uses ARP to resolve MAC addresses of other devices (like the default gateway) for local communication."},
+{l:4,d:"harder",cat:"Cloud",q:"Which cloud model (SaaS/PaaS/IaaS) gives the customer the MOST control over the infrastructure?",o:["SaaS — customer controls all layers","PaaS — customer controls applications and data only","IaaS — customer controls OS, applications, and data; provider manages hardware","All three give identical control levels"],a:2,e:"IaaS (Infrastructure as a Service) gives customers the most control — they manage OS, middleware, applications, and data. PaaS manages OS/runtime too. SaaS manages everything; customers only use the application."},
+{l:4,d:"harder",cat:"History",q:"The transition from ARPAnet to the modern Internet was facilitated by which critical protocol development?",o:["HTTP","HTML","TCP/IP protocol suite (1983)","Ethernet standard (1980)"],a:2,e:"On January 1, 1983 ('Flag Day'), ARPAnet adopted TCP/IP as its standard protocol. This created a universal networking language allowing diverse networks to interconnect — the true birth of the Internet."},
+{l:4,d:"harder",cat:"Security",q:"A 'stateful' firewall differs from a 'stateless' (packet-filtering) firewall because it:",o:["Only filters outbound traffic, not inbound","Tracks the state of network connections, allowing return traffic automatically for established connections","Requires manual rule updates for every IP address","Can only block based on port numbers"],a:1,e:"Stateful firewalls maintain a connection state table — once an outbound connection is established, return packets are automatically permitted. Stateless firewalls evaluate each packet individually without context."},
+{l:4,d:"harder",cat:"WWW",q:"Apache, IIS, Nginx, and Lighttpd are all examples of:",o:["Web browsers","DNS servers","Web server software","Cloud storage services"],a:2,e:"Apache HTTP Server, Microsoft IIS, Nginx, and Lighttpd are all web server applications that serve HTTP/HTTPS content to clients. Apache and Nginx dominate the web server market."},
+{l:4,d:"harder",cat:"LAN",q:"What is the purpose of a 'default gateway' in network configuration?",o:["Assign MAC addresses to connected devices","The IP address of the DNS server","The router interface through which traffic is sent when no specific route to the destination exists","Provide backup connectivity when primary link fails"],a:2,e:"The default gateway is the router's IP address on your network. When your device needs to reach an IP address outside the local network, it sends packets to the default gateway, which routes them onwards."},
+{l:4,d:"harder",cat:"Protocols",q:"TCP (Transmission Control Protocol) is described as 'connection-oriented'. This means it:",o:["Requires physical cables between connected devices","Establishes a connection (3-way handshake), ensures reliable ordered delivery, and handles retransmission of lost packets","Connects only two devices and cannot scale to networks","Operates without any error checking for speed"],a:1,e:"TCP's 3-way handshake (SYN→SYN-ACK→ACK) establishes a logical connection. TCP guarantees ordered, reliable delivery with acknowledgments and retransmission — essential for web browsing, email, and file transfer."},
+{l:4,d:"harder",cat:"DNS",q:"What does a 'TTL' (Time-To-Live) value in a DNS record control?",o:["Maximum packet size for DNS queries","How long DNS resolvers cache the record before requesting a fresh lookup","The maximum lifetime of an SSL certificate","Number of hops packets can traverse"],a:1,e:"DNS TTL determines how long (in seconds) DNS resolvers cache a record. Low TTL = more DNS lookups but faster propagation of changes. High TTL = fewer lookups (less DNS traffic) but slower change propagation."},
+{l:4,d:"harder",cat:"Cloud",q:"'Elasticity' in cloud computing refers to:",o:["Physical flexibility of server hardware","Ability to automatically scale resources up or down based on demand","Encryption of data during transmission","Geographic distribution of data centers"],a:1,e:"Cloud elasticity means resources (compute, storage, bandwidth) automatically scale up when demand increases and scale down when it decreases, ensuring performance while minimizing cost — a key advantage over fixed on-premise capacity."},
+{l:4,d:"harder",cat:"Security",q:"Why are third-party tracking cookies considered a privacy concern?",o:["They slow down browsers significantly","They can track users across multiple different websites to build behavioral profiles","They always contain malware","They permanently store passwords on the local device"],a:1,e:"Third-party cookies (set by advertisers on any site using their code) track users across different websites, building detailed behavioral profiles without explicit consent — enabling targeted advertising and raising privacy concerns."},
+{l:4,d:"harder",cat:"LAN",q:"How does NAT (Network Address Translation) enable multiple devices to share a single public IP?",o:["It assigns multiple public IPs to each device","It translates private internal IP addresses to the router's single public IP, mapping port numbers to track connections","It eliminates the need for IP addresses internally","It encrypts all outbound traffic with the public IP"],a:1,e:"NAT allows a router to translate many private IPs (192.168.x.x) to its single public IP by tracking connections using different port numbers. This conserves public IPv4 addresses and adds a layer of security."},
+{l:4,d:"harder",cat:"History",q:"Why did ARPAnet's original designers prioritize packet switching over circuit switching?",o:["Packet switching was cheaper to implement","To enable network resilience — no single point of failure; packets can reroute around damaged nodes","Circuit switching couldn't handle text data","Packet switching was the only option available in 1969"],a:1,e:"ARPAnet was designed for military resilience — if part of the network was destroyed (nuclear attack), packets could automatically reroute through surviving nodes. Circuit switching's dedicated paths would fail completely if any node was destroyed."},
+{l:4,d:"harder",cat:"WWW",q:"URI (Uniform Resource Identifier) is related to URL in that:",o:["URI and URL are completely different systems","URL is a specific type of URI that identifies resources by their network location","URI is deprecated and replaced by URL","URL is the broader concept; URI is the specific implementation"],a:1,e:"URI is the broader concept for identifying resources. URL (Uniform Resource Locator) is a type of URI that identifies resources by their location (network address). URN (Uniform Resource Name) identifies by name. All URLs are URIs."},
+{l:4,d:"harder",cat:"Cloud",q:"A company moving from on-premise to SaaS (like Google Workspace) no longer needs to manage:",o:["Their internet connection","Hardware, OS, middleware, application software, and data backups — all managed by provider","Only the hardware — everything else remains their responsibility","User accounts — those are automatically managed"],a:1,e:"With SaaS, the provider manages everything: hardware, networking, OS, databases, application software, updates, and backups. The customer only uses the application and manages their data/users."},
+{l:4,d:"harder",cat:"Security",q:"An intrusion detection system (IDS) differs from a firewall because:",o:["They are the same system with different names","IDS monitors for suspicious patterns after traffic passes the firewall; firewall blocks traffic based on rules","Firewall monitors packets; IDS assigns IP addresses","IDS only works on wireless networks"],a:1,e:"Firewalls are preventive — blocking unauthorized traffic based on rules. IDS is detective — monitoring network traffic and system logs for suspicious patterns or known attack signatures, alerting administrators after the fact."},
+{l:4,d:"harder",cat:"LAN",q:"What is the difference between a hub and a switch in a LAN?",o:["Hubs are faster than switches","A hub broadcasts data to ALL ports; a switch forwards data only to the specific destination MAC address port","Switches are older technology than hubs","Hubs use IP addresses while switches use MAC addresses"],a:1,e:"Hubs (obsolete) broadcast received frames to ALL ports — creating collisions and wasting bandwidth. Switches learn MAC addresses and forward frames only to the relevant port, dramatically improving efficiency and security."},
+{l:4,d:"harder",cat:"Protocols",q:"Why does web browsing use HTTP/HTTPS (TCP-based) rather than UDP?",o:["UDP doesn't support the HTTP protocol by design","Web pages contain interdependent resources requiring reliable ordered delivery — a missed packet would cause broken pages; TCP's reliability is essential","HTTP runs faster over TCP","UDP cannot handle text data"],a:1,e:"Web content (HTML, CSS, JS, images) requires reliable, ordered delivery — a missing packet would cause garbled pages or broken functionality. TCP's guaranteed delivery makes it appropriate for HTTP, while UDP suits real-time media where speed > reliability."},
+{l:4,d:"harder",cat:"DNS",q:"'DNS poisoning' or 'DNS spoofing' is dangerous because:",o:["It slows down all DNS queries globally","It injects false DNS records, redirecting users to malicious websites while displaying the legitimate domain name","It permanently deletes DNS records from servers","It overloads DNS servers with too many queries"],a:1,e:"DNS poisoning injects fraudulent IP mappings into a DNS resolver's cache. Users type a legitimate URL (bank.com) but are directed to an attacker's server, enabling credential theft through convincing phishing sites."},
+
+// ===== LESSON 4: HARDEST (25) =====
+{l:4,d:"hardest",cat:"Security-Deep",q:"HTTPS uses TLS (Transport Layer Security). Which components does TLS provide? (Choose the comprehensive answer)",o:["Only encryption of data in transit","Only server authentication via certificates","Confidentiality (encryption), integrity (MAC), and authentication (certificates) — all three security properties","Only protection against DDOS attacks"],a:2,e:"TLS provides: (1) Confidentiality via symmetric encryption after handshake; (2) Integrity via MAC (Message Authentication Code) ensuring data wasn't tampered; (3) Authentication via X.509 certificates verifying server identity."},
+{l:4,d:"hardest",cat:"Architecture-Deep",q:"CDNs (Content Delivery Networks) function similarly to web caches but at global scale. What is their primary mechanism?",o:["Storing all content in one massive centralized server","Distributing copies of content to edge servers worldwide, serving users from geographically nearest location","Compressing all web content to reduce transfer time","Replacing DNS with a faster custom protocol"],a:1,e:"CDNs place edge servers globally. When you visit netflix.com, TLS terminates at the nearest edge node (perhaps Singapore for Philippines users) rather than Netflix's origin (California), dramatically reducing latency for the majority of traffic."},
+{l:4,d:"hardest",cat:"Protocols-Deep",q:"HTTP/2 and HTTP/3 improve upon HTTP/1.1 primarily by addressing what fundamental limitation?",o:["HTTP/1.1 cannot handle HTTPS","HTTP/1.1 only supports text — not binary data","HTTP/1.1's head-of-line blocking — one slow request delays all others on the same connection","HTTP/1.1 requires IPv6 addresses only"],a:2,e:"HTTP/1.1 processes requests serially per connection — one slow response blocks all others (head-of-line blocking). HTTP/2 adds multiplexing (multiple streams per connection). HTTP/3 (QUIC) moves to UDP, further eliminating TCP head-of-line blocking."},
+{l:4,d:"hardest",cat:"DNS-Deep",q:"DNSSEC was developed to address which fundamental DNS vulnerability?",o:["DNS queries are too slow due to multiple server hops","DNS responses are unauthenticated — anyone can forge responses; DNSSEC adds digital signatures to verify record authenticity","DNS cannot resolve IPv6 addresses","DNS servers are easily overloaded by legitimate traffic"],a:1,e:"Standard DNS has no authentication — resolvers accept answers without verification, enabling spoofing/poisoning. DNSSEC adds cryptographic digital signatures to DNS records, allowing resolvers to verify that responses haven't been tampered with."},
+{l:4,d:"hardest",cat:"Cloud-Deep",q:"The 'shared responsibility model' in cloud security means:",o:["The cloud provider is responsible for all security","The customer is responsible for all security","Security responsibilities are divided: provider secures infrastructure, customer secures data, applications, and access management","Only regulatory compliance is shared"],a:2,e:"In cloud's shared responsibility: provider secures physical facilities, hypervisor, and infrastructure (security OF the cloud). Customer secures their applications, data, IAM, and network configuration (security IN the cloud). Misunderstanding this boundary causes most cloud breaches."},
+{l:4,d:"hardest",cat:"Architecture-Deep",q:"Why is IPv6 replacing IPv4, and what is the key technical difference?",o:["IPv6 is faster than IPv4 due to simpler header","IPv4 with 32-bit addresses provides only 4.3B unique IPs — exhausted; IPv6 uses 128-bit addresses providing 340 undecillion IPs","IPv4 is insecure and IPv6 has built-in encryption","IPv6 supports wireless while IPv4 is wired-only"],a:1,e:"IPv4's 32-bit address space = ~4.3 billion IPs — exhausted as of 2011 (IANA) due to internet growth. IPv6's 128-bit space = 3.4×10^38 addresses — essentially unlimited. IPv6 also improves routing efficiency and has native IPsec support."},
+{l:4,d:"hardest",cat:"Security-Deep",q:"A DDoS (Distributed Denial of Service) attack differs from a DoS attack because:",o:["DDoS targets databases while DoS targets web servers","DDoS uses thousands of compromised machines simultaneously to overwhelm a target, making it impossible to block a single source IP","DoS attacks are illegal while DDoS is legal","DDoS only affects wireless networks"],a:1,e:"DoS comes from a single source (easily blocked by IP). DDoS uses botnets — thousands of compromised machines worldwide — flooding a target from millions of IPs simultaneously, making IP-based blocking ineffective."},
+{l:4,d:"hardest",cat:"Cloud-Deep",q:"'Vendor lock-in' is a significant risk of cloud computing because:",o:["Cloud vendors can increase prices arbitrarily, and migrating away is costly due to proprietary APIs, data formats, and architectures","Cloud vendors share customer data with competitors","Cloud services always have worse uptime than on-premise","Vendor lock-in only affects SaaS, not IaaS"],a:0,e:"When organizations build heavily on proprietary cloud services (AWS Lambda, Google BigQuery), migrating to another provider becomes extremely complex and costly. This gives cloud vendors pricing power and creates strategic dependency."},
+{l:4,d:"hardest",cat:"Protocols-Deep",q:"WebSocket protocol improves upon traditional HTTP for real-time applications because:",o:["WebSocket is more secure than HTTPS","Traditional HTTP is request-response — server cannot push data without a request; WebSocket establishes persistent bidirectional connection enabling real-time server push","WebSocket uses UDP instead of TCP for speed","WebSocket replaces DNS with faster name resolution"],a:1,e:"HTTP's request-response model requires the client to poll for updates. WebSocket (RFC 6455) establishes a persistent, full-duplex TCP connection after an HTTP upgrade, enabling real-time bidirectional communication — essential for chat, live dashboards, and gaming."},
+{l:4,d:"hardest",cat:"History-Deep",q:"The transition from Web 1.0 to Web 2.0 is characterized primarily by the shift from:",o:["Text-only to multimedia content","Dial-up to broadband connectivity","Static read-only pages to dynamic user-generated content and social interaction","HTTP to HTTPS encryption"],a:2,e:"Web 1.0 (1990s-early 2000s): static read-only websites, one-way publisher→reader model. Web 2.0 (mid-2000s+): user-generated content, social media, wikis, collaborative platforms — the participatory web enabled by AJAX and dynamic technologies."},
+{l:4,d:"hardest",cat:"DNS-Deep",q:"When a company changes web hosting providers, DNS propagation takes time because:",o:["The new server needs time to install and configure itself","DNS records are cached at resolvers worldwide with TTL timers — all cached copies must expire before the new IP propagates globally","Domain registrars manually verify each DNS change","Old servers continue serving until the new server is fully loaded"],a:1,e:"DNS records are cached at resolvers globally according to TTL values. After changing DNS records, cached entries persist until TTL expires. With TTL of 86400 (24 hours), full global propagation can take 24-48 hours — why lowering TTL before migration is best practice."},
+{l:4,d:"hardest",cat:"Architecture-Deep",q:"'Anycast' routing, used by DNS root servers and CDNs, works by:",o:["Sending the same packet to all servers simultaneously","Routing packets to the topologically nearest server sharing the same IP address — multiple locations announce the same IP","Selecting the server with the most available bandwidth","Encrypting data differently for each geographic region"],a:1,e:"Anycast assigns the same IP to servers worldwide. BGP routing directs each client to their nearest anycast node. Cloudflare's 1.1.1.1 DNS uses anycast — your query goes to the nearest of 250+ global locations, enabling sub-millisecond DNS resolution."},
+{l:4,d:"hardest",cat:"Security-Deep",q:"Zero-trust security model contrasts with traditional perimeter security in that zero-trust:",o:["Trusts all traffic inside the corporate network firewall","Never trusts any request by default — every access requires verification regardless of network location","Only applies to cloud environments, not on-premise","Eliminates the need for firewalls entirely"],a:1,e:"Traditional security trusted internal network traffic implicitly. Zero-trust (coined by John Kindervag, 2010) assumes breach — every request, even internal, requires authentication, authorization, and encryption. Critical as work-from-anywhere and cloud blur the network perimeter."},
+{l:4,d:"hardest",cat:"Cloud-Deep",q:"Edge computing emerged as a complement to cloud computing to address what limitation?",o:["Cloud computing is too expensive for all use cases","Cloud data centers are geographically distant, creating latency — edge computing processes data closer to its source for real-time requirements (IoT, autonomous vehicles, AR)","Cloud cannot process video data","Edge computing provides better security than cloud"],a:1,e:"Speed of light limits cloud response time for distant data centers (~100ms+ round trip). Edge computing places compute at network edge (base stations, local servers), enabling <10ms latency for autonomous vehicles, industrial IoT, and AR/VR that cannot tolerate cloud latency."},
+{l:4,d:"hardest",cat:"Protocols-Deep",q:"BGP (Border Gateway Protocol) is called 'the protocol that runs the Internet' because:",o:["BGP is the base protocol for HTTP and web browsing","BGP enables autonomous systems (ISPs, organizations) to exchange routing information, determining how data traverses between different networks globally","BGP assigns IP addresses to end users","BGP manages DNS root server synchronization"],a:1,e:"BGP is the inter-domain routing protocol connecting autonomous systems (AS) — each ISP/organization is an AS. BGP advertises which IP prefixes each AS can reach, building the global routing table that determines how packets traverse the Internet's complex topology."},
+{l:4,d:"hardest",cat:"Security-Deep",q:"SQL injection attacks target web applications because many:",o:["Web servers use outdated HTTP versions","Web applications directly interpolate user input into database queries without sanitization, allowing attackers to execute arbitrary SQL","Web databases are publicly accessible by default","HTTPS cannot protect database connections"],a:1,e:"SQL injection: attacker enters SQL code in form fields (username: 'admin' OR '1'='1'). If the application concatenates input into queries without parameterized statements/sanitization, the malicious SQL executes — potentially exposing or destroying entire databases."},
+{l:4,d:"hardest",cat:"Architecture-Deep",q:"The OSI model has 7 layers. Where do HTTP and DNS operate, and why does this matter for security?",o:["Both at Layer 3 (Network) — IP security covers both","HTTP at Layer 7 (Application), DNS at Layer 7 (Application) — firewalls filtering only lower layers miss application-layer attacks targeting these protocols","HTTP at Layer 4 (Transport), DNS at Layer 3 (Network)","Both at Layer 2 (Data Link) — MAC filtering provides complete protection"],a:1,e:"HTTP and DNS both operate at Layer 7 (Application). Traditional firewalls filter at Layers 3-4 (IP/TCP). Layer 7 attacks (DNS poisoning, HTTP injection, malicious URLs) bypass these — requiring application-aware next-generation firewalls (NGFW) or WAF (Web Application Firewall)."},
+{l:4,d:"hardest",cat:"Cloud-Deep",q:"Serverless computing (FaaS — Function as a Service) differs from traditional IaaS/PaaS in that developers:",o:["Cannot run any code in serverless environments","Write individual functions that execute on-demand without managing servers — billed per execution, automatically scaling to zero","Must still provision and manage virtual machines","Can only use serverless for database operations"],a:1,e:"Serverless (AWS Lambda, Google Cloud Functions) lets developers deploy code functions triggered by events. No server management, auto-scaling from 0 to millions of requests, and per-execution billing. The trade-off: cold-start latency and vendor lock-in."},
+{l:4,d:"hardest",cat:"History-Deep",q:"The Philippines became connected to the Internet in what context, and what major challenge does Philippines internet infrastructure face?",o:["First connected in 1969 via ARPAnet","Connected in the early 1990s; historical challenge is geographic fragmentation as an archipelago requiring extensive submarine cable infrastructure","First connected in 2000 via satellite only","Still not connected to global internet backbone"],a:1,e:"The Philippines connected to the Internet in the early 1990s. As an archipelago of 7,641 islands, building terrestrial fiber is challenging. The country depends heavily on submarine cables (and satellite) and historically struggled with limited cable landing stations creating bandwidth bottlenecks."},
+{l:4,d:"hardest",cat:"Protocols-Deep",q:"QUIC (Quick UDP Internet Connections), which forms the basis of HTTP/3, achieves lower latency than TCP by:",o:["Eliminating all error correction for maximum speed","Multiplexing streams over UDP with connection establishment integrated into the first handshake, reducing connection setup from 3+ round trips to 1-0","Running entirely within the application layer without OS involvement","Using shorter IP addresses for faster routing"],a:1,e:"TCP requires SYN/SYN-ACK/ACK (1.5 RTT) then TLS handshake (1-2 more RTT). QUIC combines transport and TLS 1.3 handshake into 1 RTT (or 0-RTT resumption). Combined with UDP's no head-of-line blocking, QUIC dramatically improves performance for modern web applications."},
+{l:4,d:"hardest",cat:"Security-Deep",q:"Why is session fixation considered more dangerous than session hijacking?",o:["Session fixation only affects HTTPS connections","In hijacking, the attacker steals an existing session ID; in fixation, the attacker sets the session ID BEFORE the user logs in — authentication itself validates the attacker's chosen ID","Session fixation requires physical access to the server","Both attacks are equally dangerous with no meaningful difference"],a:1,e:"Session hijacking steals an authenticated session ID after login. Session fixation is more insidious: the attacker pre-sets the session ID (via URL parameter or cookie), waits for the victim to authenticate, then uses the known ID — bypassing the need to intercept anything."},
+{l:4,d:"hardest",cat:"Cloud-Deep",q:"Multi-cloud strategy (using multiple cloud providers simultaneously) addresses what primary business risk?",o:["Multi-cloud always reduces costs by 50%","Reduces vendor lock-in and single point of failure — if one provider has outage or raises prices, workloads can shift to alternate providers","Multi-cloud is only for startups","Multi-cloud eliminates the need for on-premise infrastructure entirely"],a:1,e:"Multi-cloud mitigates vendor lock-in (price leverage and portability), geographic compliance requirements (data sovereignty), and catastrophic failure risk — a single cloud provider's regional outage doesn't affect workloads on other providers' infrastructure."},
+{l:4,d:"hardest",cat:"Architecture-Deep",q:"The 'Internet of Things' (IoT) represents a scaling challenge for the Internet because:",o:["IoT devices are too expensive for widespread deployment","Billions of new connected devices strain IPv4 address space, network bandwidth, and security infrastructure — requiring IPv6, edge computing, and new security paradigms","IoT devices use proprietary protocols incompatible with TCP/IP","IoT requires a completely separate network from the Internet"],a:1,e:"IoT adds billions of devices (sensors, cameras, appliances) to the Internet, requiring IPv6 for addressing, edge computing for latency, new protocols (MQTT, CoAP) for constrained devices, and entirely new security approaches as most IoT devices have poor security posture."},
+{l:4,d:"hardest",cat:"History-Deep",q:"Net neutrality refers to the principle that ISPs must:",o:["Provide free internet access to educational institutions","Treat all internet traffic equally without discriminating by source, destination, or content type — preventing ISPs from throttling or prioritizing specific services","Maintain the internet as a neutral public utility owned by governments","Ensure equal internet speeds for all customers regardless of plan"],a:1,e:"Net neutrality prevents ISPs from becoming gatekeepers — discriminating against traffic (slowing Netflix competitors, blocking VoIP) or charging content providers for preferential delivery. Its regulatory status varies by country and remains a contested policy issue."}
+];
+
+
+// =============================================
+// QUIZ STATE & LOGIC
+// =============================================
+let quizState = { filter:'all', count:25, questions:[], current:0, score:0, streak:0, answered:false };
+
+function setSel(btn, group) {
+  document.querySelectorAll(`[data-group="${group}"]`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  quizState[group] = btn.dataset.val;
+}
+
+function startQuiz() {
+  let pool = QB.slice();
+  if(quizState.filter === '1') pool = QB.filter(q => q.l === 1);
+  else if(quizState.filter === '4') pool = QB.filter(q => q.l === 4);
+  else if(quizState.filter === 'hardest') pool = QB.filter(q => q.d === 'hardest');
+  pool = pool.sort(() => Math.random() - 0.5);
+  const cnt = Math.min(parseInt(quizState.count) || 25, pool.length);
+  quizState.questions = pool.slice(0, cnt);
+  quizState.current = 0;
+  quizState.score = 0;
+  quizState.streak = 0;
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  renderQuestion();
+}
+
+function renderQuestion() {
+  quizState.answered = false;
+  const q = quizState.questions[quizState.current];
+  const total = quizState.questions.length;
+  const pct = (quizState.current / total) * 100;
+  document.getElementById('qprogress').style.width = pct + '%';
+  document.getElementById('qcounter').textContent = `Q ${quizState.current + 1} / ${total}`;
+  const diffMap = {hard:'diff-hard',harder:'diff-harder',hardest:'diff-hardest'};
+  const diffEl = document.getElementById('qdiff');
+  diffEl.textContent = q.d.toUpperCase();
+  diffEl.className = 'diff-badge ' + (diffMap[q.d] || '');
+  document.getElementById('qcat').textContent = q.cat;
+  document.getElementById('qstreak').textContent = quizState.streak > 1 ? `🔥 ${quizState.streak}` : '';
+  document.getElementById('qtext').textContent = q.q;
+  document.getElementById('qexplan').className = 'explanation';
+  document.getElementById('qnext').className = 'next-btn';
+  const optContainer = document.getElementById('qoptions');
+  optContainer.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.o.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-letter">${letters[i]}</span>${opt}`;
+    btn.onclick = () => selectAnswer(i);
+    optContainer.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if(quizState.answered) return;
+  quizState.answered = true;
+  const q = quizState.questions[quizState.current];
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if(i === q.a) b.classList.add('correct');
+    else if(i === idx && idx !== q.a) b.classList.add('wrong');
+  });
+  if(idx === q.a) {
+    quizState.score++;
+    quizState.streak++;
+  } else {
+    quizState.streak = 0;
+  }
+  document.getElementById('qstreak').textContent = quizState.streak > 1 ? `🔥 ${quizState.streak}` : '';
+  const explan = document.getElementById('qexplan');
+  explan.textContent = q.e;
+  explan.classList.add('show');
+  document.getElementById('qnext').classList.add('show');
+}
+
+function nextQuestion() {
+  quizState.current++;
+  if(quizState.current >= quizState.questions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  const rs = document.getElementById('results-screen');
+  rs.style.display = 'block';
+  const pct = Math.round((quizState.score / quizState.questions.length) * 100);
+  document.getElementById('scoreRing').style.setProperty('--pct', pct + '%');
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('scoreDetails').textContent = `${quizState.score} / ${quizState.questions.length} correct`;
+  const msgs = {90:'🏆 OUTSTANDING! You have mastered this material.',75:'✅ EXCELLENT! Strong understanding demonstrated.',60:'📚 GOOD EFFORT. Review the missed questions.',0:'🔄 KEEP STUDYING. Practice makes perfect!'};
+  const msg = Object.entries(msgs).reverse().find(([k]) => pct >= parseInt(k));
+  document.getElementById('scoreMsg').textContent = msg ? msg[1] : '';
+  const msgEl = document.getElementById('scoreMsg');
+  msgEl.style.color = pct >= 90 ? 'var(--lime)' : pct >= 75 ? 'var(--cyan)' : pct >= 60 ? 'var(--gold)' : 'var(--pink)';
+}
+
+function retryQuiz() {
+  quizState.questions = quizState.questions.sort(() => Math.random() - 0.5);
+  quizState.current = 0;
+  quizState.score = 0;
+  quizState.streak = 0;
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  renderQuestion();
+}
+
+function resetQuiz() {
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('setup-screen').style.display = 'block';
+}
+
+// =============================================
+// FLASHCARDS
+// =============================================
+const FC = [
+  {t:"Control Unit (CU)",d:"Manages the fetch-decode-execute cycle; directs all CPU operations without performing computation itself.",l:1},
+  {t:"ALU",d:"Arithmetic Logic Unit — performs all arithmetic (add/subtract/multiply/divide) and logical (AND/OR/NOT/compare) operations.",l:1},
+  {t:"Registers",d:"Fastest storage in the computer hierarchy; tiny memory cells directly inside the CPU holding immediately needed data/instructions.",l:1},
+  {t:"Cache Memory",d:"High-speed memory between CPU registers and RAM. L1 (fastest/smallest per core), L2 (medium), L3 (largest/shared). Uses SRAM technology.",l:1},
+  {t:"Virtual Memory",d:"Technique using disk space to simulate additional RAM. Allows running programs larger than physical RAM but with significant performance penalty.",l:1},
+  {t:"Primary Storage",d:"RAM (Random Access Memory) — volatile working memory holding active programs and data. Fast but loses all data when power is removed.",l:1},
+  {t:"Secondary Storage",d:"Non-volatile permanent storage: HDD, SSD, optical discs. Slower than RAM but retains data without power. Much larger capacity.",l:1},
+  {t:"Mainframe Computer",d:"Ultra-reliable large computer optimized for high-volume transaction processing. Used in banking and airlines. Offers 99.999% uptime.",l:1},
+  {t:"Supercomputer",d:"World's fastest computers measured in FLOPS. Used for scientific simulations (nuclear, weather, AI research). El Capitan: #1 at 2.746 exaFLOPS.",l:1},
+  {t:"Peripheral Device",d:"External hardware connected to main computer system — includes input devices (keyboard, mouse, scanner) and output devices (monitor, printer).",l:1},
+  {t:"I/O Bridge",d:"Chipset component connecting CPU to both the Memory Bus (RAM) and I/O Bus (peripherals). Acts as central traffic controller for data flow.",l:1},
+  {t:"Desktop Computer",d:"Standard personal computer designed for stationary use on a desk. Uses full-size components with external monitor, keyboard, and mouse.",l:1},
+  {t:"Workstation",d:"High-performance desktop for professional use. Features ECC RAM, powerful CPUs, and professional GPUs for CAD, 3D rendering, and scientific work.",l:1},
+  {t:"Blade Server",d:"Ultra-thin modular server cards that slot into a shared chassis providing power, cooling, and networking — maximizing density in data centers.",l:1},
+  {t:"exaFLOPS",d:"Unit of computing performance = 10^18 (one quintillion) floating-point operations per second. Exascale threshold crossed by Frontier (2022) and El Capitan (2024).",l:1},
+  {t:"El Capitan",d:"World's #1 supercomputer (as of 2024). 2.746 exaFLOPS, located at LLNL California, uses 11M+ AMD MI300A processors, costs ~$600M, consumes 29.5 MW.",l:1},
+  {t:"RAM",d:"Random Access Memory — primary volatile storage for active data/programs. Modern systems use DDR4/DDR5 DRAM. Loses all data when power is cut.",l:1},
+  {t:"Storage Hierarchy",d:"Pyramid organizing storage from fastest/smallest/most-expensive (Registers) to slowest/largest/cheapest (Secondary). Registers→Cache→RAM→Virtual Memory→HDD/SSD.",l:1},
+  {t:"Program Counter",d:"Special CPU register holding the memory address of the NEXT instruction to be fetched and executed. Automatically increments after each fetch.",l:1},
+  {t:"4 Elements of Computer System",d:"Hardware (physical components), Software (programs/OS), Data (raw facts processed), and Communications (network connections). All four are interdependent.",l:1},
+  {t:"Rack Server",d:"Complete self-contained server unit (1U-4U height) mounted in a standard 19-inch rack. Has its own power supply unlike blade servers.",l:1},
+  {t:"Input Unit",d:"Hardware components that accept data from users/environment: keyboard, mouse, scanner, camera, microphone, touchscreen, barcode reader.",l:1},
+  {t:"Output Unit",d:"Hardware components that present processed information to users: monitor, printer, speakers, projector, LED indicators.",l:1},
+  {t:"Frontier",d:"Supercomputer at Oak Ridge National Laboratory, Tennessee. First to break the exascale barrier at 1.194 exaFLOPS. Now ranked #2 behind El Capitan.",l:1},
+  {t:"Von Neumann Architecture",d:"Standard computer design where instructions and data share the same memory and bus. Creates Von Neumann bottleneck limiting CPU-memory bandwidth.",l:1},
+
+  {t:"Internet",d:"Global network of interconnected computer networks using TCP/IP protocol suite. Different from WWW — the Internet is the infrastructure; WWW is a service running on it.",l:4},
+  {t:"ISP",d:"Internet Service Provider — company providing internet access to customers. Connects users to the Internet backbone via cable, DSL, fiber, or wireless.",l:4},
+  {t:"MAC Address",d:"Media Access Control address — unique 48-bit hardware identifier burned into each network interface at manufacturing. Operates at Layer 2 (Data Link).",l:4},
+  {t:"DHCP",d:"Dynamic Host Configuration Protocol — automatically assigns IP addresses, subnet masks, gateway, and DNS to devices joining a network. Uses DORA process.",l:4},
+  {t:"ARP",d:"Address Resolution Protocol — maps known IP addresses to MAC addresses within a local network. Broadcasts requests to find the MAC of a given IP.",l:4},
+  {t:"Default Gateway",d:"IP address of the router interface used to send traffic destined for networks outside the local subnet. Usually the router's LAN IP address.",l:4},
+  {t:"IEEE 802.11",d:"Standard defining Wi-Fi wireless LAN protocols. Multiple variants (a/b/g/n/ac/ax) define different frequencies, speeds, and ranges. Wi-Fi 6 = 802.11ax.",l:4},
+  {t:"HTTP",d:"HyperText Transfer Protocol — application-layer protocol for transferring web content between clients and servers. HTTPS adds TLS encryption.",l:4},
+  {t:"DNS",d:"Domain Name System — translates human-readable domain names (google.com) into IP addresses. Hierarchical: Root → TLD → Authoritative name servers.",l:4},
+  {t:"URL",d:"Uniform Resource Locator — specific address of a resource on the Web. Components: protocol://domain:port/path?query#fragment.",l:4},
+  {t:"Cookie",d:"Small data file stored by web browser from a server. Maintains session state, login tokens, and user preferences across stateless HTTP requests.",l:4},
+  {t:"Firewall",d:"Network security device/software filtering traffic based on rules. Creates security boundary between trusted internal network and untrusted external networks.",l:4},
+  {t:"Cloud Computing",d:"Delivery of computing services (IaaS/PaaS/SaaS) over the Internet on pay-per-use basis. Key advantages: elasticity, scalability, no upfront CAPEX.",l:4},
+  {t:"FTP",d:"File Transfer Protocol — standard protocol for transferring files between client and server over TCP. Uses ports 20 (data) and 21 (control). SFTP is secure version.",l:4},
+  {t:"WWW Structural View",d:"Physical architecture of the Web: Client (browser), Server (web server), Cache (proxy), and Internet (interconnecting infrastructure).",l:4},
+  {t:"WWW Semantic View",d:"Logical/language layer of Web: HTTP (transfer protocol), HTML (markup), XML (data description), URI (resource identification).",l:4},
+  {t:"Web Browser",d:"Client-side application for accessing WWW resources. Renders HTML/CSS/JS and communicates via HTTP/HTTPS. Examples: Chrome, Firefox, Safari, Edge.",l:4},
+  {t:"Web Server",d:"Software serving HTTP/HTTPS content to clients. Examples: Apache (most popular), Nginx, Microsoft IIS, Lighttpd, Sun Java Web Server.",l:4},
+  {t:"Web Analytics",d:"Collection and analysis of website usage data — page views, visitors, bounce rates, traffic sources — to understand user behavior and optimize performance.",l:4},
+  {t:"Ethernet",d:"IEEE 802.3 wired LAN standard developed by Xerox/DEC/Intel. Dominant wired networking technology. Modern speeds: 1Gbps/10Gbps/100Gbps.",l:4},
+  {t:"Modem",d:"Modulator-Demodulator — converts digital data to signals compatible with ISP infrastructure (cable, DSL, fiber). Provides physical connection to ISP.",l:4},
+  {t:"ARPAnet",d:"Advanced Research Projects Agency Network — predecessor to the Internet. Established 1969 with 4 nodes. First network to implement packet switching at scale.",l:4},
+  {t:"On-Premise",d:"IT infrastructure owned, operated, and maintained within the organization's own facilities. Full control but requires large upfront capital investment (CAPEX).",l:4},
+  {t:"Domain Name",d:"Human-readable address for internet resources (e.g., usep.edu.ph). Structure: subdomain.domain.TLD. DNS resolves these to IP addresses.",l:4},
+  {t:"Packet Switching",d:"Network technique splitting data into packets routed independently, potentially via different paths, reassembled at destination. Enables resilient, efficient networking."},
+];
+
+let fcFiltered = FC.slice();
+let fcIndex = 0;
+
+function filterCards(f, btn) {
+  document.querySelectorAll('.fc-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if(f === 'all') fcFiltered = FC.slice();
+  else fcFiltered = FC.filter(c => c.l === parseInt(f));
+  fcIndex = 0;
+  document.getElementById('fc-card').classList.remove('flipped');
+  renderCard();
+}
+
+function shuffleCards() {
+  fcFiltered = fcFiltered.sort(() => Math.random() - 0.5);
+  fcIndex = 0;
+  document.getElementById('fc-card').classList.remove('flipped');
+  renderCard();
+}
+
+function renderCard() {
+  const c = fcFiltered[fcIndex];
+  document.getElementById('fc-term').textContent = c.t;
+  document.getElementById('fc-def').textContent = c.d;
+  document.getElementById('fc-lesson').textContent = c.l ? `LESSON ${c.l}` : 'LESSON 4';
+  document.getElementById('fc-prog').textContent = `${fcIndex + 1} / ${fcFiltered.length}`;
+  document.getElementById('fc-inner').style.transition = 'none';
+}
+
+function flipCard() {
+  document.getElementById('fc-card').classList.toggle('flipped');
+}
+
+function prevCard() {
+  document.getElementById('fc-card').classList.remove('flipped');
+  setTimeout(() => {
+    fcIndex = (fcIndex - 1 + fcFiltered.length) % fcFiltered.length;
+    renderCard();
+  }, 150);
+}
+
+function nextCard() {
+  document.getElementById('fc-card').classList.remove('flipped');
+  setTimeout(() => {
+    fcIndex = (fcIndex + 1) % fcFiltered.length;
+    renderCard();
+  }, 150);
+}
+
+// =============================================
+// STUDY GUIDE
+// =============================================
+const STUDY = [
+  {title:"A — 4 Elements of a Computer System", content:`A computer system consists of four interdependent elements. <strong>Hardware</strong> refers to all physical, tangible components — the CPU, RAM, storage devices, motherboard, and peripherals. <strong>Software</strong> encompasses all programs and operating systems that instruct hardware what to do. <strong>Data</strong> is the raw, unprocessed facts and figures that hardware and software work with to produce useful information. <strong>Communications</strong> includes all network infrastructure, protocols, and connections enabling computers to exchange data with each other and the internet. All four elements must work together for a complete functioning computer system.`},
+  {title:"B — Hardware Components", content:`Computer hardware comprises several key subsystems. The <strong>CPU (Central Processing Unit)</strong> is the 'brain' — it processes instructions. <strong>Primary storage (RAM)</strong> holds active programs and data temporarily. <strong>Secondary storage</strong> (HDD, SSD) permanently stores files and programs. <strong>Input devices</strong> (keyboard, mouse, scanner, microphone) accept data from users. <strong>Output devices</strong> (monitor, printer, speakers) present results. <strong>Peripheral devices</strong> are any external devices connected to the system. The <strong>motherboard</strong> houses and connects all internal components. The <strong>I/O Bridge (chipset)</strong> connects the CPU to memory and I/O subsystems, managing data flow across the <strong>Memory Bus</strong> (CPU↔RAM) and <strong>I/O Bus</strong> (CPU↔peripherals).`},
+  {title:"C — CPU Architecture", content:`The CPU has three core components. The <strong>Control Unit (CU)</strong> manages the <em>fetch-decode-execute cycle</em>: it fetches instructions from memory, decodes their meaning, and orchestrates execution across CPU components. The <strong>ALU (Arithmetic Logic Unit)</strong> performs all calculations — arithmetic operations (addition, subtraction) and logical operations (AND, OR, NOT, comparisons). <strong>Registers</strong> are ultra-fast on-chip storage cells holding data the CPU is actively processing. The <span class="kw">Program Counter</span> register tracks the address of the next instruction. The <span class="kw">Bus Interface Unit</span> manages communication between the CPU and the external system bus. Modern CPUs contain multiple cores, each with its own CU, ALU, and private L1/L2 cache, sharing L3 cache across cores.`},
+  {title:"D — Storage Hierarchy", content:`The storage hierarchy arranges storage from fastest/most expensive/smallest to slowest/cheapest/largest. At the top: <span class="kw">CPU Registers</span> — nanosecond access, bytes in size, directly inside CPU. Next: <span class="kw">Cache (L1/L2/L3)</span> — uses SRAM, L1 is per-core and fastest (~1TB/s bandwidth), L3 is shared and larger. Then: <span class="kw">RAM (Primary Storage)</span> — uses DRAM, gigabytes in size, volatile (loses data without power). Below RAM: <span class="kw">Virtual Memory</span> — disk space simulating extra RAM, dramatically slower (100,000× slower than RAM). At the bottom: <span class="kw">Secondary Storage</span> — HDD (magnetic, cheapest per GB), SSD (flash, faster, more durable), Optical (CD/DVD/Blu-ray). Key principle: <em>faster = smaller & more expensive per bit; slower = larger & cheaper per bit.</em>`},
+  {title:"E — Computer Categories", content:`Computers are classified into several categories by purpose and capability. <strong>Desktop PCs</strong> are general-purpose stationary computers for everyday use. <strong>Workstations</strong> are high-performance desktops with ECC RAM and professional-grade GPUs for CAD, 3D rendering, and scientific work. <strong>Mobile computers</strong> (laptops) balance portability and performance. <strong>Tablets</strong> use touch interfaces and mobile processors. <strong>Smartphones</strong> are pocket-sized mobile computers with cellular connectivity. <strong>Game consoles</strong> are specialized for interactive entertainment with custom CPU/GPU. <strong>Network servers</strong> provide services to client devices — including <span class="kw">rack servers</span> (self-contained 1U-4U units) and <span class="kw">blade servers</span> (modular cards in shared chassis). <strong>Mainframes</strong> handle high-volume transactions with extreme reliability (99.999% uptime) for banking/airlines. <strong>Supercomputers</strong> are purpose-built for massive parallel computation — <em>El Capitan (LLNL, California): 2.746 exaFLOPS, 11M+ AMD MI300A processors, ~$600M cost, 29.5 MW power consumption</em> — currently ranked #1 globally. Frontier (Oak Ridge, TN) is #2 at 1.194 exaFLOPS.`},
+  {title:"F — Internet History Timeline", content:`The Internet's development spans decades. <strong>1957</strong>: USSR launches Sputnik, triggering US technological response. <strong>1958</strong>: DARPA (Defense Advanced Research Projects Agency) established. <strong>1969</strong>: ARPAnet goes live with 4 nodes (UCLA, Stanford, UCSB, U Utah) — first packet-switched network. <strong>1983</strong>: TCP/IP adopted as ARPAnet standard — true birth of the Internet. <strong>1991</strong>: Tim Berners-Lee releases the World Wide Web at CERN — HTTP, HTML, and URLs invented. <strong>1993</strong>: Mosaic browser makes Web accessible to public. <strong>1998</strong>: Google founded. <strong>2004</strong>: Facebook launches. <strong>2007</strong>: iPhone introduces modern smartphone internet. <strong>2019</strong>: <em>4.39 billion internet users</em> worldwide — over half the global population. The Internet is the physical infrastructure; the WWW is one service running on top of it.`},
+  {title:"G — LAN Infrastructure", content:`A Local Area Network (LAN) connects devices in a limited geographic area. Key components: <span class="kw">MAC Address</span> — unique 48-bit hardware identifier (Layer 2) burned into each NIC. <span class="kw">IP Address</span> — logical network address (Layer 3) for routing across networks. <span class="kw">DHCP</span> — automatically assigns IP, subnet mask, gateway, and DNS via DORA process (Discover→Offer→Request→Acknowledge). <span class="kw">ARP</span> — resolves IP addresses to MAC addresses within LAN. <span class="kw">Switch</span> — Layer 2 device forwarding frames only to correct MAC address port (unlike hubs that broadcast to all). <span class="kw">Router/Gateway</span> — connects different networks; default gateway routes traffic outside LAN. <span class="kw">Modem</span> — converts signals for ISP connection. <span class="kw">Ethernet (IEEE 802.3)</span> — dominant wired LAN standard (invented by Xerox/DEC/Intel). <span class="kw">Wi-Fi (IEEE 802.11)</span> — wireless LAN standard (802.11ax = Wi-Fi 6 is latest common version). ISP provides the connection to the global Internet.`},
+  {title:"H — WWW & Protocols", content:`The World Wide Web has two conceptual views. <strong>Structural view</strong>: <span class="kw">Client</span> (web browser requesting pages), <span class="kw">Server</span> (web server software responding), <span class="kw">Cache/Proxy</span> (stores copies of resources to reduce latency), <span class="kw">Internet</span> (physical infrastructure). <strong>Semantic view</strong>: <span class="kw">HTTP/HTTPS</span> (transfer protocol; HTTPS adds TLS encryption), <span class="kw">HTML</span> (markup for page structure), <span class="kw">XML</span> (data description/exchange), <span class="kw">URI/URL</span> (resource identification). <strong>URL anatomy</strong>: <em>protocol://subdomain.domain.TLD:port/path?query#fragment</em>. <strong>DNS</strong> resolves domain names to IPs via hierarchy: Root Servers → TLD Servers (.com/.ph) → Authoritative Servers. Popular web servers: <span class="kw">Apache</span>, <span class="kw">Nginx</span>, <span class="kw">Microsoft IIS</span>, <span class="kw">Lighttpd</span>. <strong>Cookies</strong> maintain session state in stateless HTTP — stores login tokens, preferences, and tracking data. <strong>FTP</strong> (File Transfer Protocol) transfers files using ports 20 and 21.`},
+  {title:"I — Cloud Computing & Security", content:`<strong>Cloud Computing</strong> delivers IT resources over the Internet on pay-per-use basis. Service models: <span class="kw">IaaS</span> (Infrastructure — virtual servers, storage, networking; customer manages OS+apps), <span class="kw">PaaS</span> (Platform — runtime/middleware managed; customer manages apps+data), <span class="kw">SaaS</span> (Software — complete application; customer only uses it). Key advantages: elasticity (auto-scale), no CAPEX, global availability. <strong>On-Premise</strong>: organization owns/manages all hardware in own facility — full control, higher CAPEX. <strong>Web Analytics</strong> tracks visitor behavior, traffic sources, and engagement metrics. <strong>Security</strong>: <span class="kw">Firewall</span> filters traffic by rules — stateless (per-packet) or stateful (tracks connection state). <span class="kw">Cookies</span> can track users across sites (privacy concern). <span class="kw">HTTPS/TLS</span> provides confidentiality, integrity, and authentication. Common threats: DDoS attacks, SQL injection, session hijacking, DNS poisoning, phishing.`},
+  {title:"J — Domain Extensions & Internet Structure", content:`Domain names have hierarchical structure. <strong>TLDs (Top-Level Domains)</strong> include: <span class="kw">.com</span> (commercial), <span class="kw">.org</span> (organizations), <span class="kw">.edu</span> (education), <span class="kw">.gov</span> (government), <span class="kw">.net</span> (network), <span class="kw">.mil</span> (military). <strong>Country Code TLDs</strong>: <span class="kw">.ph</span> (Philippines), <span class="kw">.us</span> (United States), <span class="kw">.uk</span> (United Kingdom), <span class="kw">.jp</span> (Japan). <strong>New gTLDs</strong>: .tech, .app, .online, etc. Full domain: <em>subdomain.secondlevel.TLD</em> — e.g., <em>www.usep.edu.ph</em> (www = subdomain, usep = second-level, edu.ph = TLD). DNS resolves these to IP addresses through a hierarchy: <strong>Root servers</strong> (13 sets globally) → <strong>TLD servers</strong> (for .ph, .com, etc.) → <strong>Authoritative servers</strong> (for specific domains) → returned to <strong>recursive resolver</strong> at your ISP → your device.`}
+];
+
+function buildStudyGuide() {
+  const acc = document.getElementById('study-accordion');
+  STUDY.forEach((s, i) => {
+    const item = document.createElement('div');
+    item.className = 'accordion-item';
+    item.innerHTML = `
+      <button class="accordion-header" onclick="toggleAcc(${i})">
+        ${s.title}
+        <span id="acc-icon-${i}">▼</span>
+      </button>
+      <div class="accordion-body" id="acc-body-${i}">
+        <div class="accordion-content">${s.content}</div>
+      </div>`;
+    acc.appendChild(item);
+  });
+}
+
+function toggleAcc(i) {
+  const body = document.getElementById(`acc-body-${i}`);
+  const icon = document.getElementById(`acc-icon-${i}`);
+  body.classList.toggle('open');
+  icon.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+// =============================================
+// CRITICAL THINKING
+// =============================================
+const CT = [
+  {q:"If RAM operated at the same speed as CPU registers, how would the storage hierarchy change? What would become obsolete, what would be strengthened, and what trade-offs would emerge?",hint:"Consider why cache exists — to bridge the speed gap between registers and RAM. If that gap closed, the entire middle tier of the hierarchy (L1/L2/L3 cache) would lose its primary justification. However, the gap between RAM and secondary storage would still exist. Think about cost implications — registers use expensive SRAM; making all RAM register-speed would be prohibitively expensive. What does this tell you about why the hierarchy exists in the form it does?"},
+  {q:"Explain the difference between the Internet and the World Wide Web to a 10-year-old who has never studied computing, using an analogy from everyday Filipino life.",hint:"Think of the Internet as the physical roads and highways system (EDSA, national highways, bridges) connecting all cities and provinces. The WWW is then like one specific type of activity you can do on those roads — like riding a jeepney to visit specific shops. Email, FTP, and video calls are other services (different vehicles/activities) also using the same road network. The key insight: you can have roads without jeepneys, but jeepneys cannot operate without roads."},
+  {q:"El Capitan cost $600M and consumes 29.5 MW of power annually (~$25.8M/year in electricity). Cloud computing can rent equivalent computational power for minutes at a time. For what specific use cases would building El Capitan still make sense over renting cloud resources? Defend your position with technical reasoning.",hint:"Consider: (1) Tightly-coupled simulations (nuclear physics, protein folding) require microsecond MPI communication between nodes — cloud introduces virtualization overhead and network latency incompatible with this. (2) National security applications cannot run on foreign commercial infrastructure. (3) Dedicated hardware means no 'noisy neighbor' effects. (4) At sustained 24/7 workloads, buy vs. rent economics eventually favor ownership. (5) Custom architectures (AMD MI300A APU) provide capabilities not available in standard cloud instances."},
+  {q:"Your network security professor says 'cookies are not inherently dangerous.' However, cookies are frequently cited in cybersecurity discussions as privacy threats. Analyze this apparent contradiction and explain under what conditions each statement is true.",hint:"Cookies themselves are just text files — they cannot execute code, install malware, or directly access your system. In that sense, they are 'not dangerous.' The privacy concern arises from HOW they are used: first-party session cookies (maintaining login) are benign and necessary. Third-party tracking cookies aggregate behavior across hundreds of websites to build profiles without explicit consent. Combined with data broker networks, this creates significant privacy risks. The danger is in the ecosystem and business model, not the technical mechanism itself."},
+  {q:"As a USEP engineering student, you've been asked to advise on whether USEP should migrate student academic records (grades, enrollment, transcripts) from on-premise servers to cloud infrastructure. Analyze the key factors from at least four different perspectives: security, cost, accessibility, and Philippine regulatory compliance.",hint:"Security: On-premise gives full control but requires dedicated IT staff; cloud providers often have better security infrastructure than small institutions but introduce data sovereignty concerns. Cost: On-premise has high CAPEX (servers, AC, UPS, staff) vs cloud OPEX (pay-per-use, but ongoing). Accessibility: Cloud enables anywhere-access (critical during COVID-style disruptions) while on-premise depends on campus connectivity. Regulatory: RA 10173 (Data Privacy Act of Philippines) requires data protection — cloud is allowed if proper DPA agreements are in place. Also consider: CHED data governance policies, disaster recovery (cloud has built-in geographic redundancy), and vendor lock-in risk if moving to proprietary cloud services."}
+];
+
+function buildCritical() {
+  const container = document.getElementById('critical-container');
+  CT.forEach((ct, i) => {
+    const div = document.createElement('div');
+    div.className = 'card ct-card';
+    div.innerHTML = `
+      <div class="ct-q"><span>0${i+1}</span>${ct.q}</div>
+      <textarea placeholder="Write your answer here... Think deeply about the implications."></textarea>
+      <button class="hint-btn" onclick="toggleHint(${i})">💡 SHOW KEY INSIGHT HINTS</button>
+      <div class="hint-text" id="hint-${i}">${ct.hint}</div>`;
+    container.appendChild(div);
+  });
+}
+
+function toggleHint(i) {
+  const el = document.getElementById(`hint-${i}`);
+  el.classList.toggle('visible');
+}
+
+// =============================================
+// TAB NAVIGATION
+// =============================================
+function showTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`panel-${name}`).classList.add('active');
+  if(btn) btn.classList.add('active');
+}
+
+// INIT
+window.onload = () => {
+  renderCard();
+  buildStudyGuide();
+  buildCritical();
+};
+</script>
+</body>
+</html>
